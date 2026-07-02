@@ -3,15 +3,19 @@ import type { Question, Answer, Level, LearnLanguage } from '../types';
 import { getRandomQuestions } from '../data/questions';
 import { useLang } from '../i18n/LanguageContext';
 import { useTTS } from '../hooks/useTTS';
+import { useTimer } from '../hooks/useTimer';
 
 interface QuizProps {
   level: Level;
   learnLang: LearnLanguage;
+  timed: boolean;
   onComplete: (answers: Answer[], questions: Question[]) => void;
   onBack: () => void;
 }
 
-export function Quiz({ level, learnLang, onComplete, onBack }: QuizProps) {
+const TIME_PER_QUESTION = 20;
+
+export function Quiz({ level, learnLang, timed, onComplete, onBack }: QuizProps) {
   const { t } = useLang();
   const { speak } = useTTS();
   const [quizQuestions] = useState(() => getRandomQuestions(learnLang, level, 10));
@@ -19,34 +23,56 @@ export function Quiz({ level, learnLang, onComplete, onBack }: QuizProps) {
   const [selectedAnswer, setSelectedAnswer] = useState<string | null>(null);
   const [isAnswered, setIsAnswered] = useState(false);
   const [answers, setAnswers] = useState<Answer[]>([]);
+  const [timedOut, setTimedOut] = useState(false);
 
   const current = quizQuestions[currentIndex];
   const progress = ((currentIndex + (isAnswered ? 1 : 0)) / quizQuestions.length) * 100;
 
-  const handleSelect = useCallback((answer: string) => {
-    if (isAnswered) return;
-    setSelectedAnswer(answer);
-    setIsAnswered(true);
-  }, [isAnswered]);
-
-  const handleNext = useCallback(() => {
-    if (!selectedAnswer) return;
-    const isCorrect = selectedAnswer === current.correctAnswer;
-    const newAnswers = [...answers, { questionId: current.id, userAnswer: selectedAnswer, isCorrect }];
+  const finishQuestion = useCallback((userAnswer: string | null) => {
+    const isCorrect = userAnswer === current.correctAnswer;
+    const newAnswers = [...answers, { questionId: current.id, userAnswer: userAnswer || '', isCorrect }];
     setAnswers(newAnswers);
 
     if (currentIndex < quizQuestions.length - 1) {
       setCurrentIndex((i) => i + 1);
       setSelectedAnswer(null);
       setIsAnswered(false);
+      setTimedOut(false);
     } else {
       onComplete(newAnswers, quizQuestions);
     }
-  }, [selectedAnswer, current, currentIndex, answers, quizQuestions, onComplete]);
+  }, [current, currentIndex, answers, quizQuestions, onComplete]);
+
+  const handleTimeUp = useCallback(() => {
+    if (isAnswered) return;
+    setTimedOut(true);
+    setIsAnswered(true);
+  }, [isAnswered]);
+
+  const timer = useTimer({
+    duration: TIME_PER_QUESTION,
+    onTimeUp: handleTimeUp,
+    running: timed && !isAnswered,
+  });
+
+  const handleSelect = useCallback((answer: string) => {
+    if (isAnswered) return;
+    setSelectedAnswer(answer);
+    setIsAnswered(true);
+    setTimedOut(false);
+  }, [isAnswered]);
+
+  const handleNext = useCallback(() => {
+    finishQuestion(selectedAnswer);
+  }, [finishQuestion, selectedAnswer]);
 
   const handleSpeak = (text: string) => {
     speak(text, learnLang);
   };
+
+  const timerColor = timed
+    ? timer.pct > 50 ? 'var(--green)' : timer.pct > 25 ? 'var(--orange)' : 'var(--red)'
+    : 'transparent';
 
   return (
     <div className="quiz-screen" dir="auto">
@@ -58,7 +84,17 @@ export function Quiz({ level, learnLang, onComplete, onBack }: QuizProps) {
         <span className="question-counter">{currentIndex + 1}/{quizQuestions.length}</span>
       </div>
 
+      {timed && (
+        <div className="timer-bar-bg">
+          <div className="timer-bar-fill" style={{ width: `${timer.pct}%`, background: timerColor }} />
+          <span className="timer-text" style={{ color: timerColor }}>{timer.remaining}s</span>
+        </div>
+      )}
+
       <div className="quiz-card" key={current.id}>
+        {timedOut && (
+          <div className="timeout-banner">⏰ Time's up!</div>
+        )}
         <div className="question-category">{current.category}</div>
         <div className="question-row">
           <p className="question-text">{current.question}</p>
@@ -73,6 +109,7 @@ export function Quiz({ level, learnLang, onComplete, onBack }: QuizProps) {
               else if (opt === selectedAnswer) btnClass += ' wrong';
               else btnClass += ' dimmed';
             }
+            if (timedOut && opt === current.correctAnswer) btnClass += ' correct';
             return (
               <button
                 key={opt}
@@ -91,7 +128,7 @@ export function Quiz({ level, learnLang, onComplete, onBack }: QuizProps) {
 
         {isAnswered && (
           <div className={`explanation-box ${selectedAnswer === current.correctAnswer ? 'correct-box' : 'wrong-box'}`}>
-            <strong>{selectedAnswer === current.correctAnswer ? t('quiz.correct') : t('quiz.oops')}</strong>
+            <strong>{timedOut ? '⏰ Time\'s up!' : selectedAnswer === current.correctAnswer ? t('quiz.correct') : t('quiz.oops')}</strong>
             <p>{current.explanation}</p>
           </div>
         )}

@@ -9,6 +9,8 @@ interface LevelSelectProps {
   onStudy: (level: Level) => void;
   learnLang: LearnLanguage;
   onLearnLangChange: (lang: LearnLanguage) => void;
+  timed: boolean;
+  onTimedChange: (v: boolean) => void;
 }
 
 const levelNameKey: Record<string, string> = {
@@ -25,7 +27,7 @@ const levelDescKey: Record<string, string> = {
   B2: 'level.desc.b2',
 };
 
-export function LevelSelect({ onSelect, onStudy, learnLang, onLearnLangChange }: LevelSelectProps) {
+export function LevelSelect({ onSelect, onStudy, learnLang, onLearnLangChange, timed, onTimedChange }: LevelSelectProps) {
   const { t } = useLang();
 
   return (
@@ -37,6 +39,22 @@ export function LevelSelect({ onSelect, onStudy, learnLang, onLearnLangChange }:
         <p className="app-subtitle">{t('app.subtitle')}</p>
       </div>
       <LearnLangSelector value={learnLang} onChange={onLearnLangChange} />
+
+      <div className="mode-toggles">
+        <button
+          className={`mode-pill ${!timed ? 'active' : ''}`}
+          onClick={() => onTimedChange(false)}
+        >
+          🏖️ Practice
+        </button>
+        <button
+          className={`mode-pill ${timed ? 'active exam' : ''}`}
+          onClick={() => onTimedChange(true)}
+        >
+          ⏱️ Exam
+        </button>
+      </div>
+
       <div className="study-prompt">
         <span className="study-prompt-text">📚 Study before the quiz</span>
         <div className="study-prompt-levels">
@@ -47,6 +65,7 @@ export function LevelSelect({ onSelect, onStudy, learnLang, onLearnLangChange }:
           ))}
         </div>
       </div>
+
       <div className="level-cards" style={{ marginTop: 20 }}>
         {levels.map((level) => (
           <button

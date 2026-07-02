@@ -16,6 +16,7 @@ function AppContent() {
   const [screen, setScreen] = useState<Screen>('levels');
   const [level, setLevel] = useState<Level>('A1');
   const [learnLang, setLearnLang] = useState<LearnLanguage>('de');
+  const [timed, setTimed] = useState(false);
   const [completedQuestions, setCompletedQuestions] = useState<Question[]>([]);
   const [completedAnswers, setCompletedAnswers] = useState<Answer[]>([]);
 
@@ -50,13 +51,20 @@ function AppContent() {
   return (
     <div className="app-container" dir={rtlLangs.has(lang) ? 'rtl' : 'ltr'}>
       {screen === 'levels' && (
-        <LevelSelect onSelect={handleLevelSelect} onStudy={handleStudy} learnLang={learnLang} onLearnLangChange={setLearnLang} />
+        <LevelSelect
+          onSelect={handleLevelSelect}
+          onStudy={handleStudy}
+          learnLang={learnLang}
+          onLearnLangChange={setLearnLang}
+          timed={timed}
+          onTimedChange={setTimed}
+        />
       )}
       {screen === 'study' && (
         <FlashcardStudy learnLang={learnLang} level={level} onStartQuiz={handleStudyDone} onBack={handleBackToLevels} />
       )}
       {screen === 'quiz' && (
-        <Quiz level={level} learnLang={learnLang} onComplete={handleQuizComplete} onBack={handleBackToLevels} />
+        <Quiz level={level} learnLang={learnLang} timed={timed} onComplete={handleQuizComplete} onBack={handleBackToLevels} />
       )}
       {screen === 'results' && (
         <Results

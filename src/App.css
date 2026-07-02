@@ -342,6 +342,78 @@
   text-align: right;
 }
 
+/* ============ TIMER BAR ============ */
+.timer-bar-bg {
+  height: 8px;
+  background: #e5e5e5;
+  border-radius: 4px;
+  overflow: hidden;
+  margin-bottom: 12px;
+  position: relative;
+}
+
+.timer-bar-fill {
+  height: 100%;
+  border-radius: 4px;
+  transition: width 1s linear, background 0.5s;
+}
+
+.timer-text {
+  position: absolute;
+  right: 8px;
+  top: -18px;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+/* ============ TIMEOUT BANNER ============ */
+.timeout-banner {
+  background: var(--red);
+  color: white;
+  text-align: center;
+  font-weight: 700;
+  font-size: 15px;
+  padding: 8px;
+  border-radius: 10px;
+  margin-bottom: 12px;
+  animation: shake 0.4s ease;
+}
+
+/* ============ MODE TOGGLES ============ */
+.mode-toggles {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  margin-bottom: 16px;
+}
+
+.mode-pill {
+  font-size: 14px;
+  font-weight: 700;
+  padding: 8px 20px;
+  border-radius: 20px;
+  border: 2px solid #ccc;
+  background: var(--card-bg);
+  color: var(--text-light);
+  transition: all 0.2s;
+}
+
+.mode-pill.active {
+  border-color: var(--green);
+  background: #e8fce8;
+  color: var(--green);
+}
+
+.mode-pill.active.exam {
+  border-color: var(--orange);
+  background: #fff3e0;
+  color: var(--orange);
+}
+
+.mode-pill:hover {
+  transform: scale(1.04);
+}
+
 .quiz-card {
   background: var(--card-bg);
   border-radius: 20px;
