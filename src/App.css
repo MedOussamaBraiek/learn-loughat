@@ -47,12 +47,20 @@
   text-align: right;
 }
 
+[dir="rtl"] .level-card-wrapper {
+  text-align: right;
+}
+
 [dir="rtl"] .level-arrow::after {
   content: '←';
 }
 
 [dir="rtl"] .level-card:hover .level-arrow::after {
   transform: translateX(-4px);
+}
+
+[dir="rtl"] .level-card-links {
+  justify-content: flex-end;
 }
 
 [dir="rtl"] .category-breakdown {
@@ -225,24 +233,52 @@
   width: 100%;
 }
 
+.level-card-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
 .level-card {
   background: var(--card-bg);
   border-radius: 16px;
-  padding: 28px 24px;
+  padding: 24px 24px 20px;
   text-align: left;
   box-shadow: var(--shadow);
   border: 3px solid transparent;
   transition: all 0.3s ease;
-  position: relative;
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 4px;
 }
 
 .level-card:hover {
   transform: translateY(-4px);
   box-shadow: var(--shadow-lg);
   border-color: var(--level-color);
+}
+
+.level-card-links {
+  display: flex;
+  gap: 8px;
+}
+
+.level-link {
+  flex: 1;
+  font-size: 13px;
+  font-weight: 700;
+  padding: 8px 12px;
+  border-radius: 10px;
+  border: 2px solid var(--level-color);
+  color: var(--level-color);
+  background: transparent;
+  transition: all 0.2s;
+  text-align: center;
+}
+
+.level-link:hover {
+  background: var(--level-color);
+  color: white;
 }
 
 .level-badge {
@@ -261,14 +297,13 @@
   font-size: 14px;
   color: var(--text-light);
   line-height: 1.4;
+  margin-bottom: 4px;
 }
 
 .level-arrow {
   font-size: 14px;
   font-weight: 700;
   color: var(--level-color);
-  margin-top: 4px;
-  transition: gap 0.3s ease;
   display: flex;
   align-items: center;
   gap: 4px;
@@ -282,6 +317,203 @@
 
 .level-card:hover .level-arrow::after {
   transform: translateX(4px);
+}
+
+/* ============ CURRICULUM / SYLLABUS ============ */
+.curriculum-screen {
+  min-height: 100vh;
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 20px;
+  animation: fadeIn 0.3s ease-out;
+}
+
+.curriculum-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 20px;
+  position: relative;
+  justify-content: center;
+}
+
+.curriculum-level-badge {
+  font-size: 28px;
+}
+
+.curriculum-title {
+  font-size: 24px;
+  font-weight: 800;
+  color: var(--text);
+}
+
+.curriculum-overview {
+  background: var(--card-bg);
+  border-radius: 14px;
+  padding: 18px 22px;
+  box-shadow: var(--shadow);
+  margin-bottom: 16px;
+}
+
+.curriculum-overview-text {
+  font-size: 15px;
+  color: var(--text-light);
+  line-height: 1.5;
+}
+
+.curriculum-actions {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 24px;
+}
+
+.curriculum-action-btn {
+  flex: 1;
+  font-size: 15px;
+  font-weight: 700;
+  padding: 14px 20px;
+  border-radius: 14px;
+  text-align: center;
+  transition: all 0.2s;
+}
+
+.curriculum-action-btn.study-btn {
+  background: var(--card-bg);
+  border: 2px solid var(--blue);
+  color: var(--blue);
+}
+
+.curriculum-action-btn.study-btn:hover {
+  background: var(--blue);
+  color: white;
+}
+
+.curriculum-action-btn.quiz-btn {
+  background: var(--green);
+  border: none;
+  color: white;
+}
+
+.curriculum-action-btn.quiz-btn:hover {
+  transform: scale(1.03);
+}
+
+.curriculum-topics {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.curriculum-topic {
+  background: var(--card-bg);
+  border-radius: 14px;
+  padding: 18px 20px;
+  box-shadow: var(--shadow);
+  border-left: 4px solid var(--blue);
+  transition: box-shadow 0.2s;
+}
+
+.curriculum-topic:hover {
+  box-shadow: var(--shadow-lg);
+}
+
+.curriculum-topic-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.curriculum-topic-icon {
+  font-size: 24px;
+}
+
+.curriculum-topic-title {
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.curriculum-topic-items {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.curriculum-topic-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  font-size: 14px;
+  color: var(--text);
+  line-height: 1.4;
+}
+
+.curriculum-item-bullet {
+  color: var(--blue);
+  font-size: 16px;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.curriculum-speak-btn {
+  background: none;
+  font-size: 13px;
+  cursor: pointer;
+  opacity: 0.5;
+  transition: opacity 0.2s;
+  flex-shrink: 0;
+  padding: 0 2px;
+}
+
+.curriculum-speak-btn:hover {
+  opacity: 1;
+}
+
+.curriculum-dialog {
+  margin-top: 24px;
+}
+
+.curriculum-dialog-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 12px;
+}
+
+.curriculum-dialog-box {
+  background: var(--card-bg);
+  border-radius: 14px;
+  padding: 18px 20px;
+  box-shadow: var(--shadow);
+  border-left: 4px solid var(--green);
+}
+
+.curriculum-dialog-line {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  font-size: 14px;
+  color: var(--text);
+  line-height: 1.6;
+  margin-bottom: 4px;
+}
+
+.curriculum-dialog-line:last-child {
+  margin-bottom: 0;
+}
+
+[dir="rtl"] .curriculum-topic {
+  border-left: none;
+  border-right: 4px solid var(--blue);
+}
+
+[dir="rtl"] .curriculum-dialog-box {
+  border-left: none;
+  border-right: 4px solid var(--green);
 }
 
 /* ============ QUIZ ============ */
@@ -865,43 +1097,6 @@
 
 .action-btn.secondary:hover {
   background: #e5e5e5;
-}
-
-/* ============ STUDY PROMPT ============ */
-.study-prompt {
-  text-align: center;
-  margin-bottom: 8px;
-}
-
-.study-prompt-text {
-  display: block;
-  font-size: 14px;
-  font-weight: 700;
-  color: var(--text-light);
-  margin-bottom: 8px;
-}
-
-.study-prompt-levels {
-  display: flex;
-  gap: 8px;
-  justify-content: center;
-  flex-wrap: wrap;
-}
-
-.study-pill {
-  font-size: 14px;
-  font-weight: 700;
-  color: var(--level-color);
-  background: var(--card-bg);
-  border: 2px solid var(--level-color);
-  border-radius: 20px;
-  padding: 6px 18px;
-  transition: all 0.2s;
-}
-
-.study-pill:hover {
-  background: var(--level-color);
-  color: white;
 }
 
 /* ============ TTS / SPEAK BUTTONS ============ */

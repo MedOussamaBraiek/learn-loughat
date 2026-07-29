@@ -6,6 +6,7 @@ import { LearnLangSelector } from './LearnLangSelector';
 
 interface LevelSelectProps {
   onSelect: (level: Level) => void;
+  onSyllabus: (level: Level) => void;
   onStudy: (level: Level) => void;
   learnLang: LearnLanguage;
   onLearnLangChange: (lang: LearnLanguage) => void;
@@ -27,7 +28,7 @@ const levelDescKey: Record<string, string> = {
   B2: 'level.desc.b2',
 };
 
-export function LevelSelect({ onSelect, onStudy, learnLang, onLearnLangChange, timed, onTimedChange }: LevelSelectProps) {
+export function LevelSelect({ onSelect, onSyllabus, onStudy, learnLang, onLearnLangChange, timed, onTimedChange }: LevelSelectProps) {
   const { t } = useLang();
 
   return (
@@ -55,30 +56,27 @@ export function LevelSelect({ onSelect, onStudy, learnLang, onLearnLangChange, t
         </button>
       </div>
 
-      <div className="study-prompt">
-        <span className="study-prompt-text">📚 Study before the quiz</span>
-        <div className="study-prompt-levels">
-          {levels.map((lev) => (
-            <button key={lev.label} className="study-pill" style={{ '--level-color': lev.color } as React.CSSProperties} onClick={() => onStudy(lev.label)}>
-              {lev.label}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      <div className="level-cards" style={{ marginTop: 20 }}>
+      <div className="level-cards">
         {levels.map((level) => (
-          <button
+          <div
             key={level.label}
-            className="level-card"
-            style={{ '--level-color': level.color } as React.CSSProperties}
-            onClick={() => onSelect(level.label)}
+            className="level-card-wrapper"
           >
-            <span className="level-badge">{level.label}</span>
-            <span className="level-name">{t(levelNameKey[level.label] as any)}</span>
-            <span className="level-desc">{t(levelDescKey[level.label] as any)}</span>
-            <span className="level-arrow">→ Start Quiz</span>
-          </button>
+            <button
+              className="level-card"
+              style={{ '--level-color': level.color } as React.CSSProperties}
+              onClick={() => onSelect(level.label)}
+            >
+              <span className="level-badge">{level.label}</span>
+              <span className="level-name">{t(levelNameKey[level.label] as any)}</span>
+              <span className="level-desc">{t(levelDescKey[level.label] as any)}</span>
+              <span className="level-arrow">→ Start Quiz</span>
+            </button>
+            <div className="level-card-links">
+              <button className="level-link syllabus-link" style={{ '--level-color': level.color } as React.CSSProperties} onClick={() => onSyllabus(level.label)}>📋 Syllabus</button>
+              <button className="level-link study-link" style={{ '--level-color': level.color } as React.CSSProperties} onClick={() => onStudy(level.label)}>📚 Study</button>
+            </div>
+          </div>
         ))}
       </div>
     </div>
