@@ -31,3 +31,39 @@ export interface LearnLangInfo {
   name: string;
   flag: string;
 }
+
+export interface TopicWord {
+  word: string;
+  article: string;
+  plural: string;
+  translation: string;
+}
+
+export interface TopicUnit {
+  id: string;
+  title: string;
+  icon: string;
+  color: string;
+  words: TopicWord[];
+}
+
+export interface GrammarExample {
+  de: string;
+  en: string;
+}
+
+export interface GrammarUnit {
+  id: string;
+  title: string;
+  icon: string;
+  intro: string;
+  points: string[];
+  examples: GrammarExample[];
+}
+
+export interface Flashcard {
+  front: string;
+  back: string;
+  details: string;
+  frontLang: string;
+}

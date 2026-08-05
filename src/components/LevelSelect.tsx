@@ -70,7 +70,7 @@ export function LevelSelect({ onSelect, onSyllabus, onStudy, learnLang, onLearnL
               <span className="level-badge">{level.label}</span>
               <span className="level-name">{t(levelNameKey[level.label] as any)}</span>
               <span className="level-desc">{t(levelDescKey[level.label] as any)}</span>
-              <span className="level-arrow">→ Start Quiz</span>
+              <span className="level-arrow">→ Open Course</span>
             </button>
             <div className="level-card-links">
               <button className="level-link syllabus-link" style={{ '--level-color': level.color } as React.CSSProperties} onClick={() => onSyllabus(level.label)}>📋 Syllabus</button>

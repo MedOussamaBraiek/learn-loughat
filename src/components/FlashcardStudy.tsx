@@ -1,23 +1,18 @@
 import { useState, useMemo } from 'react';
-import type { LearnLanguage, Level } from '../types';
+import type { LearnLanguage, Level, Flashcard } from '../types';
 import { vocab, shuffle, learnLangs } from '../data/vocabulary';
 import { useTTS } from '../hooks/useTTS';
 
 interface FlashcardStudyProps {
   learnLang: LearnLanguage;
   level: Level;
+  cards?: Flashcard[];
+  title?: string;
   onStartQuiz: () => void;
   onBack: () => void;
 }
 
-interface Flashcard {
-  front: string;
-  back: string;
-  details: string;
-  frontLang: string;
-}
-
-export function FlashcardStudy({ learnLang, level, onStartQuiz, onBack }: FlashcardStudyProps) {
+export function FlashcardStudy({ learnLang, level, cards: customCards, title, onStartQuiz, onBack }: FlashcardStudyProps) {
   const { speak } = useTTS();
   const [current, setCurrent] = useState(0);
   const [flipped, setFlipped] = useState(false);
@@ -26,6 +21,8 @@ export function FlashcardStudy({ learnLang, level, onStartQuiz, onBack }: Flashc
   const langInfo = learnLangs.find((l) => l.code === learnLang);
 
   const cards: Flashcard[] = useMemo(() => {
+    if (customCards && customCards.length > 0) return customCards;
+
     const v = vocab[learnLang];
     if (!v) return [];
 
@@ -61,7 +58,7 @@ export function FlashcardStudy({ learnLang, level, onStartQuiz, onBack }: Flashc
     });
 
     return shuffle(result).slice(0, 20);
-  }, [learnLang]);
+  }, [customCards, learnLang]);
 
   const card = cards[current];
 
@@ -96,7 +93,7 @@ export function FlashcardStudy({ learnLang, level, onStartQuiz, onBack }: Flashc
             Start Quiz →
           </button>
           <button className="action-btn secondary" onClick={onBack} style={{ marginTop: 12 }}>
-            Back to Levels
+            Back
           </button>
         </div>
       </div>
@@ -114,7 +111,7 @@ export function FlashcardStudy({ learnLang, level, onStartQuiz, onBack }: Flashc
       </div>
 
       <div className="study-lang-badge">
-        {langInfo?.flag} {langInfo?.name} · {level}
+        {title ? `${title} · ${level}` : `${langInfo?.flag} ${langInfo?.name} · ${level}`}
       </div>
 
       <div className="flashcard-container" onClick={() => setFlipped(!flipped)}>

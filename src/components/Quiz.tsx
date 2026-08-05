@@ -1,6 +1,7 @@
 import { useState, useCallback } from 'react';
-import type { Question, Answer, Level, LearnLanguage } from '../types';
+import type { Question, Answer, Level, LearnLanguage, TopicWord } from '../types';
 import { getRandomQuestions } from '../data/questions';
+import { generateTopicQuestions } from '../data/generators';
 import { useLang } from '../i18n/LanguageContext';
 import { useTTS } from '../hooks/useTTS';
 import { useTimer } from '../hooks/useTimer';
@@ -9,16 +10,21 @@ interface QuizProps {
   level: Level;
   learnLang: LearnLanguage;
   timed: boolean;
+  topicWords?: TopicWord[];
   onComplete: (answers: Answer[], questions: Question[]) => void;
   onBack: () => void;
 }
 
 const TIME_PER_QUESTION = 20;
 
-export function Quiz({ level, learnLang, timed, onComplete, onBack }: QuizProps) {
+export function Quiz({ level, learnLang, timed, topicWords, onComplete, onBack }: QuizProps) {
   const { t } = useLang();
   const { speak } = useTTS();
-  const [quizQuestions] = useState(() => getRandomQuestions(learnLang, level, 10));
+  const [quizQuestions] = useState(() =>
+    topicWords && topicWords.length > 0
+      ? generateTopicQuestions(topicWords, level, 10, learnLang)
+      : getRandomQuestions(learnLang, level, 10)
+  );
   const [currentIndex, setCurrentIndex] = useState(0);
   const [selectedAnswer, setSelectedAnswer] = useState<string | null>(null);
   const [isAnswered, setIsAnswered] = useState(false);

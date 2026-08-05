@@ -242,3 +242,110 @@ export function generateQuestions(lang: LearnLanguage, _level: Level, count: num
 
   return shuffle(generated).slice(0, count);
 }
+
+function topicArticleQuestion(word: { word: string; article: string }, lang: LearnLanguage): Question | null {
+  if (lang === 'en' || !word.article) return null;
+  const articles = word.article === 'das' ? ['Der', 'Die', 'Das'] : word.article === 'die' ? ['Der', 'Die', 'Das'] : ['Der', 'Die', 'Das'];
+  const fakes = shuffle(articles.filter((a) => a.toLowerCase() !== word.article)).slice(0, 3);
+  const options = shuffle([word.article, ...fakes]);
+  return {
+    id: nextId(),
+    type: 'multiple-choice',
+    question: askInLang(
+      lang,
+      `Was ist der richtige Artikel? ___ ${word.word}`,
+      `Quel est l'article correct? ___ ${word.word}`,
+      `¿Cuál es el artículo correcto? ___ ${word.word}`,
+      `What is the correct article? ___ ${word.word}`,
+      `ما هي أداة التعريف الصحيحة؟ ___ ${word.word}`
+    ),
+    options,
+    correctAnswer: word.article,
+    explanation: askInLang(
+      lang,
+      `"${word.word}" ist ${word.article === 'der' ? 'maskulin' : word.article === 'die' ? 'feminin' : 'neutral'}.`,
+      `"${word.word}" est ${word.article === 'der' ? 'masculin' : word.article === 'die' ? 'féminin' : 'neutre'}.`,
+      `"${word.word}" es ${word.article === 'der' ? 'masculino' : word.article === 'die' ? 'femenino' : 'neutro'}.`,
+      `"${word.word}" takes "${word.article}".`,
+      `"${word.word}" يأخذ "${word.article}".`
+    ),
+    category: 'Articles',
+  };
+}
+
+function topicMeaningQuestion(word: { word: string; article: string; translation: string }, pool: { word: string; translation: string }[], lang: LearnLanguage): Question | null {
+  const wrongs = shuffle(pool.filter((w) => w.word !== word.word).map((w) => w.translation)).slice(0, 3);
+  const options = shuffle([word.translation, ...wrongs]);
+  const question = askInLang(
+    lang,
+    `Was bedeutet "${word.word}"?`,
+    `Que signifie "${word.word}" ?`,
+    `¿Qué significa "${word.word}"?`,
+    `What does "${word.word}" mean?`,
+    `ماذا تعني "${word.word}"؟`
+  );
+  return {
+    id: nextId(),
+    type: 'multiple-choice',
+    question,
+    options,
+    correctAnswer: word.translation,
+    explanation: `"${word.word}" bedeutet "${word.translation}".`,
+    category: 'Vocabulary',
+  };
+}
+
+function topicPluralQuestion(word: { word: string; article: string; plural: string }, pool: { word: string; article: string; plural: string }[]): Question | null {
+  if (!word.plural || word.plural === '-' || word.plural === word.word) return null;
+  const pluralWord = word.plural;
+  const wrongPool = pool
+    .filter((w) => w.word !== word.word && w.plural && w.plural !== '-' && w.plural !== w.word)
+    .map((w) => w.plural);
+  const wrongs = shuffle(wrongPool).slice(0, 3);
+  const options = shuffle([pluralWord, ...wrongs]);
+  const question = `Was ist die Pluralform von "${word.word}"?`;
+  return {
+    id: nextId(),
+    type: 'multiple-choice',
+    question,
+    options,
+    correctAnswer: pluralWord,
+    explanation: `Der Plural von "${word.word}" ist "${pluralWord}".`,
+    category: 'Nouns & Plurals',
+  };
+}
+
+export function generateTopicQuestions(
+  words: { word: string; article: string; plural: string; translation: string }[],
+  level: Level,
+  count: number,
+  lang: LearnLanguage = 'de'
+): Question[] {
+  const generated: Question[] = [];
+  const nounLike = words.filter((w) => w.article);
+  const withPlural = nounLike.filter((w) => w.plural && w.plural !== '-');
+  const allWithTrans = words.filter((w) => w.translation);
+
+  const attempts = count * 10;
+  for (let i = 0; i < attempts && generated.length < count; i++) {
+    const pick = Math.random();
+    if (pick < 0.4 && nounLike.length > 0) {
+      const w = randomItem(nounLike);
+      const q = topicArticleQuestion(w, lang);
+      if (q && !generated.some((g) => g.question === q.question)) generated.push(q);
+    } else if (pick < 0.75 && allWithTrans.length > 0) {
+      const w = randomItem(allWithTrans);
+      const q = topicMeaningQuestion(w, allWithTrans, lang);
+      if (q && !generated.some((g) => g.question === q.question)) generated.push(q);
+    } else if (withPlural.length > 0) {
+      const w = randomItem(withPlural);
+      const q = topicPluralQuestion(w, nounLike);
+      if (q && !generated.some((g) => g.question === q.question)) generated.push(q);
+    }
+  }
+
+  const conjugationPool = generateQuestions(lang, level, Math.ceil(count / 3)).filter((q) => q.category === 'Verbs' || q.category === 'Sentence Structure');
+  generated.push(...conjugationPool);
+
+  return shuffle(generated).slice(0, count);
+}
