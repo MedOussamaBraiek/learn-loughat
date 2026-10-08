@@ -8,6 +8,7 @@ interface LevelSelectProps {
   onSelect: (level: Level) => void;
   onSyllabus: (level: Level) => void;
   onStudy: (level: Level) => void;
+  onPictures: () => void;
   learnLang: LearnLanguage;
   onLearnLangChange: (lang: LearnLanguage) => void;
   timed: boolean;
@@ -28,7 +29,7 @@ const levelDescKey: Record<string, string> = {
   B2: 'level.desc.b2',
 };
 
-export function LevelSelect({ onSelect, onSyllabus, onStudy, learnLang, onLearnLangChange, timed, onTimedChange }: LevelSelectProps) {
+export function LevelSelect({ onSelect, onSyllabus, onStudy, onPictures, learnLang, onLearnLangChange, timed, onTimedChange }: LevelSelectProps) {
   const { t } = useLang();
 
   return (
@@ -55,6 +56,12 @@ export function LevelSelect({ onSelect, onSyllabus, onStudy, learnLang, onLearnL
           ⏱️ Exam
         </button>
       </div>
+
+      {learnLang === 'de' && (
+        <button className="picture-entry-btn" onClick={onPictures}>
+          🖼️ Picture Learning · Körper, Haus, Kleidung
+        </button>
+      )}
 
       <div className="level-cards">
         {levels.map((level) => (

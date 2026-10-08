@@ -7,11 +7,13 @@ import { TopicDetail } from './components/TopicDetail';
 import { Quiz } from './components/Quiz';
 import { Results } from './components/Results';
 import { FlashcardStudy } from './components/FlashcardStudy';
+import { WordMatch } from './components/WordMatch';
+import { PictureLearning } from './components/PictureLearning';
 import { Curriculum } from './components/Curriculum';
 import { getTopics } from './data/topics';
 import './App.css';
 
-type Screen = 'levels' | 'topics' | 'topic' | 'curriculum' | 'study' | 'quiz' | 'results';
+type Screen = 'levels' | 'topics' | 'topic' | 'match' | 'pictures' | 'curriculum' | 'study' | 'quiz' | 'results';
 
 const rtlLangs = new Set(['ar']);
 
@@ -66,6 +68,10 @@ function AppContent() {
     goTo('topic');
   };
 
+  const handleOpenPictures = () => {
+    goTo('pictures');
+  };
+
   const handleStartTopicStudy = (cards: Flashcard[], title: string) => {
     setStudyCards(cards);
     setStudyTitle(title);
@@ -96,9 +102,10 @@ function AppContent() {
     setScreen('levels');
   };
 
-  const currentTopic = activeTopicId && !activeIsGrammar
-    ? getTopics(learnLang, level).find((tp) => tp.id === activeTopicId)?.words
+  const currentTopicUnit = activeTopicId && !activeIsGrammar
+    ? getTopics(learnLang, level).find((tp) => tp.id === activeTopicId)
     : undefined;
+  const currentTopic = currentTopicUnit?.words;
 
   return (
     <div className="app-container" dir={rtlLangs.has(lang) ? 'rtl' : 'ltr'}>
@@ -107,6 +114,7 @@ function AppContent() {
           onSelect={handleLevelSelect}
           onSyllabus={handleSyllabus}
           onStudy={handleStudy}
+          onPictures={handleOpenPictures}
           learnLang={learnLang}
           onLearnLangChange={setLearnLang}
           timed={timed}
@@ -130,7 +138,21 @@ function AppContent() {
           isGrammar={activeIsGrammar}
           onStartStudy={handleStartTopicStudy}
           onStartQuiz={() => goTo('quiz')}
+          onStartMatch={() => goTo('match')}
           onBack={() => setScreen('topics')}
+        />
+      )}
+      {screen === 'pictures' && (
+        <PictureLearning
+          learnLang={learnLang}
+          onBack={handleBackToLevels}
+        />
+      )}
+      {screen === 'match' && currentTopicUnit && (
+        <WordMatch
+          topic={currentTopicUnit}
+          learnLang={learnLang}
+          onBack={() => setScreen('topic')}
         />
       )}
       {screen === 'curriculum' && (

@@ -10,6 +10,7 @@ interface TopicDetailProps {
   isGrammar: boolean;
   onStartStudy: (cards: Flashcard[], title: string) => void;
   onStartQuiz: () => void;
+  onStartMatch: () => void;
   onBack: () => void;
 }
 
@@ -19,7 +20,7 @@ const articleColor: Record<string, string> = {
   das: '#58cc02',
 };
 
-export function TopicDetail({ level, learnLang, topicId, isGrammar, onStartStudy, onStartQuiz, onBack }: TopicDetailProps) {
+export function TopicDetail({ level, learnLang, topicId, isGrammar, onStartStudy, onStartQuiz, onStartMatch, onBack }: TopicDetailProps) {
   const { speak } = useTTS();
 
   const topic: TopicUnit | undefined = useMemo(() => getTopics(learnLang, level).find((tp) => tp.id === topicId), [learnLang, level, topicId]);
@@ -72,6 +73,11 @@ export function TopicDetail({ level, learnLang, topicId, isGrammar, onStartStudy
         <button className="course-action-btn quiz-btn" onClick={onStartQuiz}>
           ▶ Quiz
         </button>
+        {topic && (
+          <button className="course-action-btn match-btn" onClick={onStartMatch} disabled={topic.words.length === 0}>
+            🎮 Match
+          </button>
+        )}
       </div>
 
       {grammar ? (
