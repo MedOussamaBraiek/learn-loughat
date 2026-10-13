@@ -117,39 +117,47 @@ export function AdminUsers({ onBack }: AdminUsersProps) {
       {error && <p className="scene-message bad">{error}</p>}
 
       <div className="admin-list">
-        {pageUsers.map((u) => (
-          <article key={u.user_id} className={`admin-card${u.is_blocked ? ' blocked' : ''}`}>
-            <div className="admin-avatar">{(u.user_nickname ?? u.user_email).charAt(0).toUpperCase()}</div>
-            <div className="admin-main">
-              <div className="admin-title-row">
-                <strong className="admin-name">{u.user_nickname ?? 'No name'}</strong>
-                <span className={`admin-status ${u.is_blocked ? 'blocked' : 'active'}`}>{u.is_blocked ? 'Blocked' : 'Active'}</span>
-              </div>
-              <span className="admin-email">{u.user_email}</span>
-              <div className="admin-chips">
-                <span>🎯 {u.attempts} played</span>
-                <span>📅 last {u.last_played ?? 'never'}</span>
-                <span>🗓️ joined {new Date(u.joined_at).toLocaleDateString()}</span>
-              </div>
-              <div className="admin-actions">
-                <button
-                  className={`admin-btn ${u.is_blocked ? 'unblock' : 'block'}`}
-                  disabled={busy === u.user_id}
-                  onClick={() => { void toggleBlock(u); }}
-                >
-                  {u.is_blocked ? '✅ Unblock' : '⛔ Block'}
-                </button>
-                <button
-                  className="admin-btn delete"
-                  disabled={busy === u.user_id}
-                  onClick={() => { void remove(u); }}
-                >
-                  🗑️ Delete
-                </button>
-              </div>
-            </div>
-          </article>
-        ))}
+        <div className="admin-table-wrap">
+          <table className="admin-table">
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Played</th>
+                <th>Last played</th>
+                <th>Joined</th>
+                <th>Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {pageUsers.map((u) => (
+                <tr key={u.user_id} className={u.is_blocked ? 'blocked' : undefined}>
+                  <td className="admin-td-name">{u.user_nickname ?? '—'}</td>
+                  <td className="admin-td-email">{u.user_email}</td>
+                  <td className="admin-td-num">{u.attempts}</td>
+                  <td>{u.last_played ?? '—'}</td>
+                  <td>{new Date(u.joined_at).toLocaleDateString()}</td>
+                  <td>
+                    <span className={`admin-status ${u.is_blocked ? 'blocked' : 'active'}`}>{u.is_blocked ? 'Blocked' : 'Active'}</span>
+                  </td>
+                  <td className="admin-td-actions">
+                    <button
+                      className={`admin-btn ${u.is_blocked ? 'unblock' : 'block'}`}
+                      disabled={busy === u.user_id}
+                      onClick={() => { void toggleBlock(u); }}
+                    >
+                      {u.is_blocked ? 'Unblock' : 'Block'}
+                    </button>
+                    <button className="admin-btn delete" disabled={busy === u.user_id} onClick={() => { void remove(u); }}>
+                      Delete
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
         {!loading && !error && shown.length > PAGE_SIZE && (
           <div className="admin-pager">
             <button className="admin-btn" disabled={currentPage === 0} onClick={() => setPage(currentPage - 1)}>← Previous</button>
