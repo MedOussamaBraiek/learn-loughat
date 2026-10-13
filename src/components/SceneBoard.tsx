@@ -170,6 +170,16 @@ export function SceneBoard({ scene, learnLang, onBack }: SceneBoardProps) {
 
   const showAll = mode === 'learn';
 
+  // Word-list pictures are cards with an emoji. Their marker sits on the card's edge, facing the label,
+  // so the picture itself stays visible. In Play mode the whole card is the place to drop a word.
+  const isCardScene = scene.items.some((i) => !!i.emoji);
+  const cardTile = scene.items.length > 10 ? 56 : 84;
+  const cardHalf = cardTile / 2;
+  const anchorX = (item: SceneInfo['items'][number]) => {
+    if (!isCardScene) return item.x;
+    return item.side === 'l' ? item.x - cardHalf : item.x + cardHalf;
+  };
+
   let prompt = 'Drag a word onto its place on the picture. Or tap a word, then tap its place.';
   if (chipSel) prompt = `Now tap the place for ${chipSel}.`;
   if (spotSel) prompt = 'Now tap the word for this place (or 💡 reveal it).';
@@ -220,7 +230,7 @@ export function SceneBoard({ scene, learnLang, onBack }: SceneBoardProps) {
                 key={item.id}
                 x1={item.side === 'l' ? 28 : 72}
                 y1={slotTop[item.id]}
-                x2={(item.x / VW) * 100}
+                x2={(anchorX(item) / VW) * 100}
                 y2={(item.y / VH) * 100}
                 stroke={colorOf[item.id]}
                 strokeWidth={2.5}
@@ -246,10 +256,17 @@ export function SceneBoard({ scene, learnLang, onBack }: SceneBoardProps) {
           if (wrongId === item.id) classes.push('wrong');
           if (hoverSpot === item.id) classes.push('hover');
           if (mode === 'play' && !done) classes.push('target');
-          const style: React.CSSProperties = {
-            left: `${(item.x / VW) * 100}%`,
-            top: `${(item.y / VH) * 100}%`,
-          };
+          const style: React.CSSProperties = {};
+          if (isCardScene && mode === 'play' && !done) {
+            classes.push('card');
+            style.left = `${((item.x - cardHalf) / VW) * 100}%`;
+            style.top = `${((item.y - cardHalf) / VH) * 100}%`;
+            style.width = `${(cardTile / VW) * 100}%`;
+            style.height = `${(cardTile / VH) * 100}%`;
+          } else {
+            style.left = `${(anchorX(item) / VW) * 100}%`;
+            style.top = `${(item.y / VH) * 100}%`;
+          }
           if (mode === 'learn') style.background = colorOf[item.id];
           return (
             <button

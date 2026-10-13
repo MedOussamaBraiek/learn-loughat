@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
-import { topOverall, type LeaderRow } from '../lib/rankings';
+import { friendlyError, topOverall, type LeaderRow } from '../lib/rankings';
 import { supabase } from '../lib/supabase';
+import { useTx } from '../i18n/uiText';
 
 interface TopThreeProps {
   onOpenRankings: () => void;
@@ -10,12 +11,13 @@ const medals = ['🥇', '🥈', '🥉'];
 
 // Home screen: the top 3 learners overall, no filters
 export function TopThree({ onOpenRankings }: TopThreeProps) {
+  const tx = useTx();
   const [rows, setRows] = useState<LeaderRow[]>([]);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!supabase) return;
-    topOverall(3).then(setRows).catch((e: Error) => setError(e.message));
+    topOverall(3).then(setRows).catch((e: unknown) => setError(friendlyError(e)));
   }, []);
 
   if (!supabase) return null;
@@ -23,11 +25,11 @@ export function TopThree({ onOpenRankings }: TopThreeProps) {
   return (
     <section className="top-three">
       <div className="top-three-head">
-        <h2>🏆 Top learners</h2>
-        <button className="top-three-link" onClick={onOpenRankings}>See all rankings →</button>
+        <h2>{tx('top.title')}</h2>
+        <button className="top-three-link" onClick={onOpenRankings}>{tx('top.all')}</button>
       </div>
       {error && <p className="match-hint">{error}</p>}
-      {!error && rows.length === 0 && <p className="match-hint">No scores yet. Take today’s challenge to appear here!</p>}
+      {!error && rows.length === 0 && <p className="match-hint">{tx('top.empty')}</p>}
       <ol className="top-three-list">
         {rows.map((r, i) => (
           <li key={`${r.nickname}-${i}`} className={`top-three-row place-${i + 1}`}>

@@ -1,6 +1,9 @@
 -- Learn Loughat: one daily challenge and one ranking per LEVEL (A1, A2, B1, B2).
 -- Run once in Supabase: SQL Editor > New query > Run. Run it after schema.sql and admin.sql.
 
+-- The blocked flag is created here too, so this file works even before admin.sql has run
+alter table public.profiles add column if not exists blocked boolean not null default false;
+
 -- Each attempt now records its level. Existing attempts are counted as A1.
 alter table public.daily_attempts add column if not exists level text not null default 'A1';
 

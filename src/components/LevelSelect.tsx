@@ -1,71 +1,63 @@
-import { levels } from '../data/questions';
-import type { Level, LearnLanguage } from '../types';
+import type { LearnLanguage } from '../types';
 import { useLang } from '../i18n/LanguageContext';
 import { LanguageSwitcher } from './LanguageSwitcher';
 import { LearnLangSelector } from './LearnLangSelector';
 import { signOut } from '../lib/rankings';
 import { supabase } from '../lib/supabase';
 import { TopThree } from './TopThree';
+import { useTx } from '../i18n/uiText';
 
 interface LevelSelectProps {
-  onSelect: (level: Level) => void;
   learnLang: LearnLanguage;
   onLearnLangChange: (lang: LearnLanguage) => void;
+  onCourses: () => void;
+  onMemory: () => void;
   onRankings: () => void;
+  onAdmin: () => void;
+  isAdmin: boolean;
 }
 
-const levelNameKey: Record<string, string> = {
-  A1: 'level.beginner',
-  A2: 'level.elementary',
-  B1: 'level.intermediate',
-  B2: 'level.upper-intermediate',
-};
-
-const levelDescKey: Record<string, string> = {
-  A1: 'level.desc.a1',
-  A2: 'level.desc.a2',
-  B1: 'level.desc.b1',
-  B2: 'level.desc.b2',
-};
-
-// Step 1 of the app: choose a language and a level. Step 2 (Hub) is what to do with it.
-export function LevelSelect({ onSelect, learnLang, onLearnLangChange, onRankings }: LevelSelectProps) {
+// Home: account bar, top learners, then two big entries: quick memory and courses
+export function LevelSelect({ learnLang, onLearnLangChange, onCourses, onMemory, onRankings, onAdmin, isAdmin }: LevelSelectProps) {
   const { t } = useLang();
+  const tx = useTx();
 
   return (
     <div className="level-screen">
-      <LanguageSwitcher />
+      <div className="account-bar">
+        {supabase ? (
+          <button className="account-btn" onClick={() => { void signOut(); }}>{tx('home.signOut')}</button>
+        ) : <span />}
+        <div className="account-bar-right">
+          {isAdmin && <button className="account-btn admin-entry" onClick={onAdmin}>{tx('home.admin')}</button>}
+          <LanguageSwitcher />
+        </div>
+      </div>
+
       <div className="level-header">
         <span className="owl-icon">🦉</span>
         <h1 className="app-title">{t('app.title')}</h1>
         <p className="app-subtitle">{t('app.subtitle')}</p>
       </div>
-      <LearnLangSelector value={learnLang} onChange={onLearnLangChange} />
-      <TopThree onOpenRankings={onRankings} />
-      {supabase && (
-        <div className="signout-row">
-          <span className="signout-text">You are signed in</span>
-          <button className="action-btn secondary signout-btn" onClick={() => { void signOut(); }}>
-            🚪 Sign out
-          </button>
-        </div>
-      )}
+      <div className="home-lang">
+        <LearnLangSelector value={learnLang} onChange={onLearnLangChange} />
+      </div>
 
-      <p className="step-label">Step 1 · Choose your level</p>
-      <div className="level-cards">
-        {levels.map((level) => (
-          <button
-            key={level.label}
-            className="level-card"
-            style={{ '--level-color': level.color } as React.CSSProperties}
-            onClick={() => onSelect(level.label)}
-          >
-            <span className="level-badge">{level.label}</span>
-            <span className="level-name">{t(levelNameKey[level.label] as any)}</span>
-            <span className="level-desc">{t(levelDescKey[level.label] as any)}</span>
-            <span className="level-arrow">Choose →</span>
-          </button>
-        ))}
+      <TopThree onOpenRankings={onRankings} />
+
+      <div className="home-entries">
+        <button className="home-entry memory" onClick={onMemory}>
+          <span className="home-entry-icon">⚡</span>
+          <span className="home-entry-title">{tx('home.memory')}</span>
+          <span className="home-entry-text">{tx('home.memoryText')}</span>
+          <span className="home-entry-go">{tx('home.start')}</span>
+        </button>
+        <button className="home-entry courses" onClick={onCourses}>
+          <span className="home-entry-icon">🎓</span>
+          <span className="home-entry-title">{tx('home.courses')}</span>
+          <span className="home-entry-text">{tx('home.coursesText')}</span>
+          <span className="home-entry-go">{tx('home.chooseLevel')}</span>
+        </button>
       </div>
     </div>
   );

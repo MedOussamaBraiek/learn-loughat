@@ -83,3 +83,12 @@ export async function topOverall(n: number = 3): Promise<LeaderRow[]> {
     pct: r.pct,
   }));
 }
+
+// Turns technical database errors into a message people can act on
+export function friendlyError(e: unknown): string {
+  const msg = e instanceof Error ? e.message : String((e as { message?: string })?.message ?? e);
+  if (/schema cache|Could not find the function|does not exist|relation .* does not exist/i.test(msg)) {
+    return 'Online features need a database update. Ask the admin to run supabase/levels.sql and supabase/overall.sql in Supabase.';
+  }
+  return msg;
+}

@@ -1,7 +1,11 @@
 // Picture-based vocabulary. Every item has a position (x, y) on a 420 x 520 canvas,
 // a side ('l' or 'r') that decides which column its label sits in, and an Arabic translation.
 
-export type SceneKind = 'body' | 'house' | 'clothes' | 'clothes-female' | 'family' | 'animals' | 'transport';
+import { topicUnits } from './topics';
+import { wordEmoji } from './wordEmoji';
+
+// Hand-drawn scenes use fixed names; word-list pictures use 'topic-<id>'
+export type SceneKind = string;
 
 export interface SceneItem {
   id: string;   // German word with article, e.g. 'der Kopf' (also the answer key)
@@ -121,3 +125,46 @@ export const pictureScenes: SceneInfo[] = [
   { kind: 'animals', title: 'Die Tiere', icon: '🐶', color: '#f39c12', items: animalItems },
   { kind: 'transport', title: 'Transport', icon: '🚗', color: '#2b9cb0', items: transportItems },
 ];
+
+// Word lists turned into pictures. Each word is a card with its picture, laid out in two columns.
+const pictureTopicIds = ['party', 'sport', 'health', 'food', 'travel', 'city', 'weather', 'colors', 'time', 'numbers', 'emotions', 'travel-a2', 'work-a2'];
+
+function gridLayout(words: { id: string; en: string; ar: string; emoji: string }[]): SceneItem[] {
+  const rows = Math.ceil(words.length / 2);
+  const top = 70;
+  const bottom = 470;
+  const step = rows > 1 ? (bottom - top) / (rows - 1) : 0;
+  return words.map((w, i) => {
+    const left = i % 2 === 0;
+    return {
+      id: w.id,
+      en: w.en,
+      ar: w.ar,
+      emoji: w.emoji,
+      x: left ? 165 : 255,
+      y: Math.round(top + Math.floor(i / 2) * step),
+      side: left ? 'l' : 'r',
+    } as SceneItem;
+  });
+}
+
+function topicPicture(id: string): SceneInfo | null {
+  const allTopics = Object.values(topicUnits.de ?? {}).flatMap((list) => list ?? []);
+  const topic = allTopics.find((t) => t.id === id);
+  if (!topic) return null;
+  const words = topic.words.map((w) => ({
+    id: w.article ? `${w.article} ${w.word}` : w.word,
+    en: w.translation,
+    ar: w.ar ?? '',
+    emoji: wordEmoji[w.word] ?? '🔹',
+  }));
+  return {
+    kind: `topic-${id}`,
+    title: topic.title,
+    icon: topic.icon,
+    color: topic.color,
+    items: gridLayout(words),
+  };
+}
+
+pictureScenes.push(...pictureTopicIds.map(topicPicture).filter((s): s is SceneInfo => s !== null));

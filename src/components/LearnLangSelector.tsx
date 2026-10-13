@@ -1,5 +1,9 @@
 import type { LearnLanguage } from '../types';
 import { learnLangs } from '../data/questions';
+import { useTx } from '../i18n/uiText';
+
+// Only German is open for now. Add more codes here when those languages are ready.
+const openLangs: LearnLanguage[] = ['de'];
 
 interface LearnLangSelectorProps {
   value: LearnLanguage;
@@ -7,11 +11,12 @@ interface LearnLangSelectorProps {
 }
 
 export function LearnLangSelector({ value, onChange }: LearnLangSelectorProps) {
+  const tx = useTx();
   return (
     <div className="learn-lang-selector">
-      <label className="learn-lang-label">I'm learning</label>
+      <label className="learn-lang-label">{tx('learning.label')}</label>
       <div className="learn-lang-options">
-        {learnLangs.map((l) => (
+        {learnLangs.filter((l) => openLangs.includes(l.code)).map((l) => (
           <button
             key={l.code}
             className={`learn-lang-btn ${l.code === value ? 'active' : ''}`}

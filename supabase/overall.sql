@@ -1,6 +1,9 @@
 -- Learn Loughat: top learners overall (all levels, all languages, all time), for the home screen.
 -- Run once in Supabase: SQL Editor > New query > Run. Blocked users are left out.
 
+-- The blocked flag is created here too, so this file works even before admin.sql has run
+alter table public.profiles add column if not exists blocked boolean not null default false;
+
 create or replace function public.top_overall(top_n int default 3)
 returns table (nickname text, correct_total int, total_questions int, pct numeric)
 language sql

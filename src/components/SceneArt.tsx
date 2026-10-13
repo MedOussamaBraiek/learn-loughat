@@ -231,19 +231,21 @@ function FamilyPicture() {
   );
 }
 
-// Emoji pictures: each item is drawn as a card with its emoji, so the picture reads at a glance
-function EmojiPicture({ items, kind }: { items: SceneItem[]; kind: 'animals' | 'transport' }) {
-  const isAnimal = kind === 'animals';
+// Emoji pictures: each item is a card with its emoji. Animals and transport have their own backgrounds.
+function EmojiPicture({ items, kind }: { items: SceneItem[]; kind: string }) {
+  const tile = items.length > 10 ? 56 : 84;
+  const half = tile / 2;
+  const fontSize = Math.round(tile * 0.64);
   return (
     <g>
-      {isAnimal ? (
+      {kind === 'animals' && (
         <>
           <rect x={0} y={0} width={420} height={320} fill="#d6f0ff" />
           <circle cx={360} cy={60} r={30} fill="#ffe27a" />
-          <ellipse cx={210} cy={330} rx={420} ry={60} fill="#b7e4a0" />
           <rect x={0} y={330} width={420} height={190} fill="#b7e4a0" />
         </>
-      ) : (
+      )}
+      {kind === 'transport' && (
         <>
           <rect x={0} y={0} width={420} height={360} fill="#e6f4ff" />
           <circle cx={360} cy={60} r={30} fill="#ffe27a" />
@@ -253,10 +255,16 @@ function EmojiPicture({ items, kind }: { items: SceneItem[]; kind: 'animals' | '
           ))}
         </>
       )}
+      {kind !== 'animals' && kind !== 'transport' && (
+        <>
+          <rect x={0} y={0} width={420} height={520} fill="#f3f9ff" />
+          <rect x={0} y={470} width={420} height={50} fill="#e4f1ff" />
+        </>
+      )}
       {items.map((item) => (
         <g key={item.id}>
-          <rect x={item.x - 42} y={item.y - 42} width={84} height={84} rx={22} fill="#ffffff" stroke="#dfe6ee" strokeWidth={2} />
-          <text x={item.x} y={item.y + 2} textAnchor="middle" dominantBaseline="central" fontSize={54}>
+          <rect x={item.x - half} y={item.y - half} width={tile} height={tile} rx={tile * 0.26} fill="#ffffff" stroke="#dfe6ee" strokeWidth={2} />
+          <text x={item.x} y={item.y + 1} textAnchor="middle" dominantBaseline="central" fontSize={fontSize}>
             {item.emoji}
           </text>
         </g>
@@ -265,17 +273,20 @@ function EmojiPicture({ items, kind }: { items: SceneItem[]; kind: 'animals' | '
   );
 }
 
+const handDrawnKinds = ['body', 'house', 'clothes', 'clothes-female', 'family'];
+
 export function SceneArt({ kind, items }: { kind: SceneKind; items: SceneItem[] }) {
+  const handDrawn = handDrawnKinds.includes(kind);
   return (
     <svg className="scene-art" viewBox="0 0 420 520" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
       <rect width={420} height={520} rx={20} fill="#eef7ff" />
-      {kind !== 'animals' && kind !== 'transport' && <ellipse cx={210} cy={504} rx={150} ry={10} fill="#cfe8ff" />}
+      {handDrawn && <ellipse cx={210} cy={504} rx={150} ry={10} fill="#cfe8ff" />}
       {kind === 'house' && <House />}
       {kind === 'clothes' && <Person clothed />}
       {kind === 'clothes-female' && <FemalePerson />}
       {kind === 'body' && <Person clothed={false} />}
       {kind === 'family' && <FamilyPicture />}
-      {(kind === 'animals' || kind === 'transport') && <EmojiPicture items={items} kind={kind} />}
+      {!handDrawn && <EmojiPicture items={items} kind={kind} />}
     </svg>
   );
 }

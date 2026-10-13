@@ -2,7 +2,6 @@ import { useState } from 'react';
 import type { LearnLanguage } from '../types';
 import { pictureScenes, type SceneKind } from '../data/scenes';
 import { SceneBoard } from './SceneBoard';
-import { GlossToggle } from './GlossToggle';
 
 interface PictureLearningProps {
   learnLang: LearnLanguage;
@@ -26,7 +25,6 @@ export function PictureLearning({ learnLang, onBack }: PictureLearningProps) {
           <h2 className="course-title">🖼️ Picture Learning</h2>
         </div>
       </div>
-      <GlossToggle />
       <p className="match-hint">Pick a picture. Learn the words with arrows, then play to test yourself.</p>
       <div className="course-unit-grid">
         {pictureScenes.map((s) => (

@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import type { Answer, Level, LearnLanguage, Question } from '../types';
 import { dailyQuestions, dayKey } from '../lib/daily';
-import { currentUser, myAttempt, signInWithGoogle, signOut, submitAttempt } from '../lib/rankings';
+import { currentUser, friendlyError, myAttempt, signInWithGoogle, signOut, submitAttempt } from '../lib/rankings';
 import { supabase } from '../lib/supabase';
 import { Quiz } from './Quiz';
 import { Leaderboard } from './Leaderboard';
@@ -12,7 +12,7 @@ interface DailyChallengeProps {
   onBack: () => void;
 }
 
-type Phase = 'loading' | 'signin' | 'ready' | 'locked' | 'playing' | 'saving' | 'done';
+type Phase = 'loading' | 'signin' | 'ready' | 'locked' | 'playing' | 'saving' | 'done' | 'error';
 
 interface Result {
   correct: number;
@@ -29,6 +29,7 @@ export function DailyChallenge({ learnLang, level, onBack }: DailyChallengeProps
   const today = dayKey();
   const questions: Question[] = useMemo(() => dailyQuestions(today, learnLang, level), [today, learnLang, level]);
   const [phase, setPhase] = useState<Phase>('loading');
+  const [loadError, setLoadError] = useState<string | null>(null);
   const [signedIn, setSignedIn] = useState(false);
   const [startedAt, setStartedAt] = useState(0);
   const [result, setResult] = useState<Result | null>(null);
@@ -36,6 +37,7 @@ export function DailyChallenge({ learnLang, level, onBack }: DailyChallengeProps
   useEffect(() => {
     let cancelled = false;
     (async () => {
+      try {
       // Without Supabase there is no account and no ranking, so the challenge is only a practice run
       if (!supabase) {
         if (!cancelled) setPhase(localStorage.getItem(startedKey(today, learnLang, level)) ? 'locked' : 'ready');
@@ -55,6 +57,12 @@ export function DailyChallenge({ learnLang, level, onBack }: DailyChallengeProps
         setPhase('done');
       } else {
         setPhase(localStorage.getItem(startedKey(today, learnLang, level)) ? 'locked' : 'ready');
+      }
+      } catch (e) {
+        if (!cancelled) {
+          setLoadError(friendlyError(e));
+          setPhase('error');
+        }
       }
     })();
     return () => { cancelled = true; };
@@ -107,6 +115,12 @@ export function DailyChallenge({ learnLang, level, onBack }: DailyChallengeProps
           <h2 className="course-title">Daily challenge · {level}</h2>
         </div>
       </div>
+
+      {phase === 'error' && (
+        <div className="daily-card">
+          <p className="scene-message bad">{loadError}</p>
+        </div>
+      )}
 
       {phase === 'loading' || phase === 'saving' ? (
         <p className="match-hint">{phase === 'saving' ? 'Saving your score…' : 'Loading…'}</p>

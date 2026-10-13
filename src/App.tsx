@@ -11,6 +11,8 @@ import { isAdminEmail } from './lib/admin';
 import { useAuthUser } from './lib/useAuthUser';
 import { supabase } from './lib/supabase';
 import { LevelSelect } from './components/LevelSelect';
+import { CoursesPage } from './components/CoursesPage';
+import { DerDieDas } from './components/DerDieDas';
 import { Hub, type HubAction } from './components/Hub';
 import { GamesMenu } from './components/GamesMenu';
 import { TopicCourse } from './components/TopicCourse';
@@ -25,7 +27,7 @@ import { getTopics } from './data/topics';
 import './App.css';
 
 // levels -> hub -> (learn | pictures | games | quiz | test | syllabus | flashcards)
-type Screen = 'levels' | 'hub' | 'daily' | 'rankings' | 'admin' | 'topics' | 'topic' | 'games' | 'match' | 'pictures' | 'curriculum' | 'study' | 'quiz' | 'results';
+type Screen = 'levels' | 'courses' | 'memory' | 'helper' | 'hub' | 'daily' | 'rankings' | 'admin' | 'topics' | 'topic' | 'games' | 'match' | 'pictures' | 'curriculum' | 'study' | 'quiz' | 'results';
 
 const rtlLangs = new Set(['ar']);
 
@@ -59,17 +61,8 @@ function AppContent({ isAdmin }: { isAdmin: boolean }) {
       case 'daily':
         goTo('daily');
         break;
-      case 'rankings':
-        goTo('rankings');
-        break;
-      case 'admin':
-        goTo('admin');
-        break;
       case 'learn':
         goTo('topics');
-        break;
-      case 'pictures':
-        goTo('pictures');
         break;
       case 'games':
         goTo('games');
@@ -95,17 +88,14 @@ function AppContent({ isAdmin }: { isAdmin: boolean }) {
     }
   };
 
-  const handleOpenTopic = (topicId: string) => {
-    setActiveTopicId(topicId);
-    setActiveIsGrammar(false);
-    setQuizUsesTopic(true);
-    goTo('topic');
-  };
+  // The topic screen returns to wherever it was opened from
+  const [topicBack, setTopicBack] = useState<Screen>('topics');
 
   const handleOpenGrammar = (grammarId: string) => {
     setActiveTopicId(grammarId);
     setActiveIsGrammar(true);
     setQuizUsesTopic(true);
+    setTopicBack('topics');
     goTo('topic');
   };
 
@@ -154,17 +144,21 @@ function AppContent({ isAdmin }: { isAdmin: boolean }) {
     <div className="app-container" dir={rtlLangs.has(lang) ? 'rtl' : 'ltr'}>
       {screen === 'levels' && (
         <LevelSelect
-          onSelect={handleLevelSelect}
           learnLang={learnLang}
           onLearnLangChange={setLearnLang}
+          onCourses={() => goTo('courses')}
+          onMemory={() => goTo('memory')}
           onRankings={() => goTo('rankings')}
+          onAdmin={() => goTo('admin')}
+          isAdmin={isAdmin}
         />
+      )}
+      {screen === 'courses' && (
+        <CoursesPage onSelect={handleLevelSelect} onBack={() => setScreen('levels')} />
       )}
       {screen === 'hub' && (
         <Hub
           level={level}
-          learnLang={learnLang}
-          isAdmin={isAdmin}
           onAction={handleHubAction}
           onBack={() => setScreen('levels')}
         />
@@ -173,9 +167,18 @@ function AppContent({ isAdmin }: { isAdmin: boolean }) {
         <TopicCourse
           level={level}
           learnLang={learnLang}
-          onOpenTopic={handleOpenTopic}
           onOpenGrammar={handleOpenGrammar}
+          onOpenHelper={() => goTo('helper')}
           onBack={handleBackToHub}
+        />
+      )}
+      {screen === 'helper' && (
+        <DerDieDas onBack={() => setScreen('topics')} />
+      )}
+      {screen === 'memory' && (
+        <PictureLearning
+          learnLang={learnLang}
+          onBack={() => setScreen('levels')}
         />
       )}
       {screen === 'topic' && (
@@ -187,14 +190,14 @@ function AppContent({ isAdmin }: { isAdmin: boolean }) {
           onStartStudy={handleStartTopicStudy}
           onStartQuiz={() => goTo('quiz')}
           onStartMatch={() => goTo('match')}
-          onBack={() => setScreen('topics')}
+          onBack={() => setScreen(topicBack)}
         />
       )}
       {screen === 'rankings' && (
-        <RankingsPage learnLang={learnLang} onBack={handleBackToHub} />
+        <RankingsPage learnLang={learnLang} onBack={() => setScreen('levels')} />
       )}
       {screen === 'admin' && isAdmin && (
-        <AdminUsers onBack={handleBackToHub} />
+        <AdminUsers onBack={() => setScreen('levels')} />
       )}
       {screen === 'daily' && (
         <DailyChallenge
@@ -214,7 +217,7 @@ function AppContent({ isAdmin }: { isAdmin: boolean }) {
       {screen === 'pictures' && (
         <PictureLearning
           learnLang={learnLang}
-          onBack={handleBackToHub}
+          onBack={() => setScreen('memory')}
         />
       )}
       {screen === 'match' && currentTopicUnit && (
