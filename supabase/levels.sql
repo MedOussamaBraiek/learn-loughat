@@ -37,3 +37,6 @@ as $$
 $$;
 
 grant execute on function public.leaderboard(date, date, text, text) to anon, authenticated;
+
+-- Tell the API to pick up the new function signature
+notify pgrst, 'reload schema';

@@ -69,3 +69,17 @@ export async function leaderboard(period: Period, today: string, lang: string, l
   if (error) throw error;
   return (data ?? []) as LeaderRow[];
 }
+
+// Top learners overall: all levels, all languages, all time (for the home screen)
+export async function topOverall(n: number = 3): Promise<LeaderRow[]> {
+  if (!supabase) return [];
+  const { data, error } = await supabase.rpc('top_overall', { top_n: n });
+  if (error) throw error;
+  return ((data ?? []) as { nickname: string; correct_total: number; total_questions: number; pct: number }[]).map((r) => ({
+    nickname: r.nickname,
+    days_played: 0,
+    correct_total: r.correct_total,
+    total_questions: r.total_questions,
+    pct: r.pct,
+  }));
+}

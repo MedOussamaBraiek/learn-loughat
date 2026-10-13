@@ -5,11 +5,13 @@ import { LanguageSwitcher } from './LanguageSwitcher';
 import { LearnLangSelector } from './LearnLangSelector';
 import { signOut } from '../lib/rankings';
 import { supabase } from '../lib/supabase';
+import { TopThree } from './TopThree';
 
 interface LevelSelectProps {
   onSelect: (level: Level) => void;
   learnLang: LearnLanguage;
   onLearnLangChange: (lang: LearnLanguage) => void;
+  onRankings: () => void;
 }
 
 const levelNameKey: Record<string, string> = {
@@ -27,7 +29,7 @@ const levelDescKey: Record<string, string> = {
 };
 
 // Step 1 of the app: choose a language and a level. Step 2 (Hub) is what to do with it.
-export function LevelSelect({ onSelect, learnLang, onLearnLangChange }: LevelSelectProps) {
+export function LevelSelect({ onSelect, learnLang, onLearnLangChange, onRankings }: LevelSelectProps) {
   const { t } = useLang();
 
   return (
@@ -39,6 +41,7 @@ export function LevelSelect({ onSelect, learnLang, onLearnLangChange }: LevelSel
         <p className="app-subtitle">{t('app.subtitle')}</p>
       </div>
       <LearnLangSelector value={learnLang} onChange={onLearnLangChange} />
+      <TopThree onOpenRankings={onRankings} />
       {supabase && (
         <div className="signout-row">
           <span className="signout-text">You are signed in</span>

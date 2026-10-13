@@ -157,6 +157,7 @@ function AppContent({ isAdmin }: { isAdmin: boolean }) {
           onSelect={handleLevelSelect}
           learnLang={learnLang}
           onLearnLangChange={setLearnLang}
+          onRankings={() => goTo('rankings')}
         />
       )}
       {screen === 'hub' && (
