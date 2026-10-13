@@ -1,19 +1,25 @@
 import { useEffect, useState } from 'react';
+import type { Level } from '../types';
 import { leaderboard, type LeaderRow, type Period } from '../lib/rankings';
 import { supabase } from '../lib/supabase';
 
 interface LeaderboardProps {
   today: string;
   lang: string;
+  initialLevel?: Level;
 }
 
-const tabs: { value: Period; label: string }[] = [
+const periods: { value: Period; label: string }[] = [
   { value: 'today', label: 'Today' },
   { value: 'week', label: 'This week' },
   { value: 'month', label: 'This month' },
 ];
 
-export function Leaderboard({ today, lang }: LeaderboardProps) {
+const levels: Level[] = ['A1', 'A2', 'B1', 'B2'];
+
+// Rankings for one level at a time, with Today / This week / This month
+export function Leaderboard({ today, lang, initialLevel = 'A1' }: LeaderboardProps) {
+  const [level, setLevel] = useState<Level>(initialLevel);
   const [period, setPeriod] = useState<Period>('today');
   const [rows, setRows] = useState<LeaderRow[]>([]);
   const [loading, setLoading] = useState(false);
@@ -24,12 +30,12 @@ export function Leaderboard({ today, lang }: LeaderboardProps) {
     let cancelled = false;
     setLoading(true);
     setError(null);
-    leaderboard(period, today, lang)
+    leaderboard(period, today, lang, level)
       .then((data) => { if (!cancelled) setRows(data); })
       .catch((e: Error) => { if (!cancelled) setError(e.message); })
       .finally(() => { if (!cancelled) setLoading(false); });
     return () => { cancelled = true; };
-  }, [period, today, lang]);
+  }, [period, today, lang, level]);
 
   if (!supabase) {
     return <p className="match-hint">Rankings are not set up yet.</p>;
@@ -37,15 +43,28 @@ export function Leaderboard({ today, lang }: LeaderboardProps) {
 
   return (
     <div className="leaderboard">
-      <div className="gloss-toggle leaderboard-tabs" role="group" aria-label="Ranking period">
-        {tabs.map((t) => (
+      <div className="gloss-toggle leaderboard-tabs" role="group" aria-label="Level">
+        {levels.map((l) => (
           <button
-            key={t.value}
-            className={`gloss-btn${period === t.value ? ' active' : ''}`}
-            aria-pressed={period === t.value}
-            onClick={() => setPeriod(t.value)}
+            key={l}
+            className={`gloss-btn${level === l ? ' active' : ''}`}
+            aria-pressed={level === l}
+            onClick={() => setLevel(l)}
           >
-            {t.label}
+            {l}
+          </button>
+        ))}
+      </div>
+
+      <div className="gloss-toggle leaderboard-tabs" role="group" aria-label="Ranking period">
+        {periods.map((p) => (
+          <button
+            key={p.value}
+            className={`gloss-btn${period === p.value ? ' active' : ''}`}
+            aria-pressed={period === p.value}
+            onClick={() => setPeriod(p.value)}
+          >
+            {p.label}
           </button>
         ))}
       </div>
@@ -53,7 +72,7 @@ export function Leaderboard({ today, lang }: LeaderboardProps) {
       {loading && <p className="match-hint">Loading…</p>}
       {error && <p className="scene-message bad">{error}</p>}
       {!loading && !error && rows.length === 0 && (
-        <p className="match-hint">No scores yet. Be the first!</p>
+        <p className="match-hint">No {level} scores yet for this period. Be the first!</p>
       )}
 
       {rows.length > 0 && (

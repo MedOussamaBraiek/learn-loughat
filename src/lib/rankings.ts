@@ -36,34 +36,36 @@ export async function signOut() {
   await supabase?.auth.signOut();
 }
 
-// This person's attempt for a day (the database only returns their own rows)
-export async function myAttempt(day: string) {
+// This person's attempt for a day, language and level (the database only returns their own rows)
+export async function myAttempt(day: string, lang: string, level: string) {
   if (!supabase) return null;
   const { data, error } = await supabase
     .from('daily_attempts')
     .select('correct, total, seconds')
     .eq('day', day)
+    .eq('lang', lang)
+    .eq('level', level)
     .maybeSingle();
   if (error) throw error;
   return data;
 }
 
-export async function submitAttempt(attempt: { day: string; lang: string; correct: number; total: number; seconds: number }) {
+export async function submitAttempt(attempt: { day: string; lang: string; level: string; correct: number; total: number; seconds: number }) {
   if (!supabase) throw new Error('Online ranking is not set up yet.');
   const user = await currentUser();
   if (!user) throw new Error('Sign in to save your score.');
   const { error } = await supabase.from('daily_attempts').insert({ ...attempt, user_id: user.id });
   if (error) {
-    // The unique (user, day) constraint rejects a second attempt on the same day
-    if (error.code === '23505') throw new Error('You already played today’s challenge.');
+    // The unique constraint rejects a second attempt for the same day, language and level
+    if (error.code === '23505') throw new Error('You already played this level’s challenge today.');
     throw error;
   }
 }
 
-export async function leaderboard(period: Period, today: string, lang: string): Promise<LeaderRow[]> {
+export async function leaderboard(period: Period, today: string, lang: string, level: string): Promise<LeaderRow[]> {
   if (!supabase) return [];
   const { from, to } = periodRange(period, today);
-  const { data, error } = await supabase.rpc('leaderboard', { from_day: from, to_day: to, lang_code: lang });
+  const { data, error } = await supabase.rpc('leaderboard', { from_day: from, to_day: to, lang_code: lang, level_code: level });
   if (error) throw error;
   return (data ?? []) as LeaderRow[];
 }

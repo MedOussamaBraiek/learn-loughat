@@ -198,6 +198,7 @@ function AppContent({ isAdmin }: { isAdmin: boolean }) {
       {screen === 'daily' && (
         <DailyChallenge
           learnLang={learnLang}
+          level={level}
           onBack={handleBackToHub}
         />
       )}

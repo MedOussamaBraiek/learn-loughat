@@ -1,14 +1,6 @@
 import type { Level, LearnLanguage, Question } from '../types';
 import { getRandomQuestions } from '../data/questions';
 
-// Today's challenge: 10 questions, a mix of all levels. Everyone gets the same set on the same day.
-const LEVEL_MIX: { level: Level; count: number }[] = [
-  { level: 'A1', count: 3 },
-  { level: 'A2', count: 3 },
-  { level: 'B1', count: 2 },
-  { level: 'B2', count: 2 },
-];
-
 // Local calendar day as YYYY-MM-DD
 export function dayKey(date: Date = new Date()): string {
   const pad = (n: number) => String(n).padStart(2, '0');
@@ -40,23 +32,16 @@ function seededRandom(seed: number): () => number {
   };
 }
 
-export function dailyQuestions(day: string, lang: LearnLanguage): Question[] {
+// Today's challenge for one level: 10 questions, the same set for everyone on that day
+export function dailyQuestions(day: string, lang: LearnLanguage, level: Level): Question[] {
   const original = Math.random;
-  let collected: Question[] = [];
+  let questions: Question[];
   try {
     // The question generators use Math.random, so swap in the seeded one while they run
-    for (const { level, count } of LEVEL_MIX) {
-      Math.random = seededRandom(seedFrom(`${day}|${lang}|${level}`));
-      collected = collected.concat(getRandomQuestions(lang, level, count));
-    }
+    Math.random = seededRandom(seedFrom(`${day}|${lang}|${level}`));
+    questions = getRandomQuestions(lang, level, 10);
   } finally {
     Math.random = original;
   }
-
-  // Mix the levels together in a fixed order for this day, and give each question a unique id
-  const mix = seededRandom(seedFrom(`${day}|${lang}|order`));
-  return collected
-    .map((q) => ({ q, r: mix() }))
-    .sort((a, b) => a.r - b.r)
-    .map(({ q }, i) => ({ ...q, id: i + 1 }));
+  return questions.map((q, i) => ({ ...q, id: i + 1 }));
 }

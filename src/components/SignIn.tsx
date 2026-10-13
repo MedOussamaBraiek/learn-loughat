@@ -1,4 +1,6 @@
 import { signInWithGoogle } from '../lib/rankings';
+import { dayKey } from '../lib/daily';
+import { Leaderboard } from './Leaderboard';
 
 const features = [
   { icon: '📖', title: 'Lessons & grammar', text: 'Articles, cases, verbs and sentence patterns explained step by step.' },
@@ -79,6 +81,12 @@ export function SignIn() {
             </div>
           ))}
         </div>
+      </section>
+
+      <section className="landing-section">
+        <h2 className="landing-h2">Rankings</h2>
+        <p className="landing-sub">Top learners in the daily challenge. Pick a level to see its ranking.</p>
+        <Leaderboard today={dayKey()} lang="de" initialLevel="A1" />
       </section>
 
       <section className="landing-section">
