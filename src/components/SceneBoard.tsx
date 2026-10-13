@@ -3,6 +3,8 @@ import type { LearnLanguage } from '../types';
 import type { SceneInfo } from '../data/scenes';
 import { SceneArt } from './SceneArt';
 import { useTTS } from '../hooks/useTTS';
+import { useGloss } from '../i18n/GlossContext';
+import { GlossToggle } from './GlossToggle';
 
 interface SceneBoardProps {
   scene: SceneInfo;
@@ -64,7 +66,12 @@ export function SceneBoard({ scene, learnLang, onBack }: SceneBoardProps) {
   }, [scene]);
 
   const solvedAll = solved.size === scene.items.length;
-  const itemLabel = (id: string) => scene.items.find((i) => i.id === id)?.en ?? '';
+  const { gloss } = useGloss();
+  const glossOf = (item: SceneInfo['items'][number]) => (gloss === 'ar' ? item.ar : item.en);
+  const itemLabel = (id: string) => {
+    const item = scene.items.find((i) => i.id === id);
+    return item ? glossOf(item) : '';
+  };
 
   const speakItem = (id: string) => speak(id, learnLang);
 
@@ -177,10 +184,14 @@ export function SceneBoard({ scene, learnLang, onBack }: SceneBoardProps) {
         </div>
       </div>
 
+      <GlossToggle />
+
       <div className="scene-modes">
         <button className={`scene-mode-btn${mode === 'learn' ? ' active' : ''}`} onClick={() => setMode('learn')}>👀 Learn</button>
         <button className={`scene-mode-btn${mode === 'play' ? ' active' : ''}`} onClick={() => setMode('play')}>🎯 Play</button>
       </div>
+
+      {scene.hint && <p className="scene-hint">💡 {scene.hint}</p>}
 
       {mode === 'learn' && (
         <p className="match-hint">Tap a word or a dot to hear it.</p>
@@ -198,7 +209,7 @@ export function SceneBoard({ scene, learnLang, onBack }: SceneBoardProps) {
       )}
 
       <div className="scene-board">
-        <SceneArt kind={scene.kind} />
+        <SceneArt kind={scene.kind} items={scene.items} />
 
         {/* arrows from each label column to its place */}
         <svg className="scene-lines" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
@@ -315,7 +326,7 @@ export function SceneBoard({ scene, learnLang, onBack }: SceneBoardProps) {
         {show ? (
           <>
             {item.id}
-            <small>{item.en}</small>
+            <small dir={gloss === 'ar' ? 'rtl' : undefined}>{glossOf(item)}</small>
           </>
         ) : '?'}
       </div>

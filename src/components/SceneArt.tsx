@@ -1,4 +1,4 @@
-import type { SceneKind } from '../data/scenes';
+import type { SceneKind, SceneItem } from '../data/scenes';
 
 // Cartoon artwork for the picture games. Everything is drawn on a 420 x 520 canvas,
 // matching the coordinates in data/scenes.ts.
@@ -162,15 +162,120 @@ function House() {
   );
 }
 
-export function SceneArt({ kind }: { kind: SceneKind }) {
+// Half-length family portrait: back row (grandparents), front row (parents and children)
+function Bust({ x, headY, r, shirt, hair, long = false, bottom }: {
+  x: number; headY: number; r: number; shirt: string; hair: string; long?: boolean; bottom: number;
+}) {
+  const top = headY + r + 6;
+  return (
+    <g>
+      {long && <rect x={x - r - 4} y={headY} width={2 * r + 8} height={r * 1.7} rx={r} fill={hair} />}
+      <rect x={x - r * 1.7} y={top} width={r * 3.4} height={bottom - top} rx={r * 0.8} fill={shirt} />
+      <rect x={x - r * 0.4} y={headY + r * 0.6} width={r * 0.8} height={r * 0.9} fill={SKIN} />
+      <circle cx={x} cy={headY - r * 0.25} r={r * 1.05} fill={hair} />
+      <circle cx={x} cy={headY + r * 0.1} r={r * 0.9} fill={SKIN} />
+      <circle cx={x - r * 0.35} cy={headY + r * 0.05} r={r * 0.12} fill="#333" />
+      <circle cx={x + r * 0.35} cy={headY + r * 0.05} r={r * 0.12} fill="#333" />
+      <path d={`M${x - r * 0.35} ${headY + r * 0.45} Q${x} ${headY + r * 0.7} ${x + r * 0.35} ${headY + r * 0.45}`} stroke="#b5484d" strokeWidth={2} fill="none" strokeLinecap="round" />
+    </g>
+  );
+}
+
+// Family tree: grandparents (top), parents and their siblings (middle), you and your siblings (bottom).
+// Lines show who is whose child; "DU" marks you.
+function FamilyPicture() {
+  const line = '#7f8c8d';
+  return (
+    <g>
+      {/* grandparents */}
+      <Bust x={130} headY={70} r={20} shirt="#6d8f5a" hair="#bdbdbd" bottom={150} />
+      <Bust x={290} headY={70} r={20} shirt="#c39bd3" hair="#c9c9c9" long bottom={150} />
+      {/* parents and their siblings */}
+      <Bust x={40} headY={205} r={22} shirt="#7f8c8d" hair="#5d4037" bottom={300} />
+      <Bust x={130} headY={205} r={22} shirt="#3498db" hair="#4a2f1d" bottom={300} />
+      <Bust x={290} headY={205} r={22} shirt="#ff7a9a" hair="#8b5a2b" long bottom={300} />
+      <Bust x={380} headY={205} r={22} shirt="#e67e22" hair="#2d2d2d" long bottom={300} />
+      {/* you and your siblings */}
+      <Bust x={110} headY={345} r={20} shirt="#2ecc71" hair="#2d2d2d" bottom={470} />
+      <Bust x={210} headY={345} r={20} shirt="#e84343" hair="#5d4037" bottom={470} />
+      <Bust x={310} headY={345} r={20} shirt="#9b59b6" hair="#8b5a2b" long bottom={470} />
+
+      {/* family lines, drawn on top of the figures */}
+      <g stroke={line} strokeWidth={3} fill="none" strokeLinecap="round">
+        {/* grandparents are a couple, their children hang from the midpoint */}
+        <line x1={130} y1={135} x2={290} y2={135} />
+        <line x1={210} y1={135} x2={210} y2={160} />
+        <line x1={40} y1={160} x2={380} y2={160} />
+        <line x1={40} y1={160} x2={40} y2={178} />
+        <line x1={130} y1={160} x2={130} y2={178} />
+        <line x1={290} y1={160} x2={290} y2={178} />
+        <line x1={380} y1={160} x2={380} y2={178} />
+        {/* parents are a couple, their children hang from the midpoint */}
+        <line x1={130} y1={250} x2={290} y2={250} />
+        <line x1={210} y1={250} x2={210} y2={300} />
+        <line x1={110} y1={300} x2={310} y2={300} />
+        <line x1={110} y1={300} x2={110} y2={319} />
+        <line x1={210} y1={300} x2={210} y2={319} />
+        <line x1={310} y1={300} x2={310} y2={319} />
+      </g>
+
+      {/* generation labels */}
+      <text x={210} y={28} textAnchor="middle" fontSize={14} fontWeight={700} fill="#4a4a4a">Großeltern</text>
+      <text x={210} y={190} textAnchor="middle" fontSize={14} fontWeight={700} fill="#4a4a4a">Eltern</text>
+      <text x={210} y={496} textAnchor="middle" fontSize={14} fontWeight={700} fill="#4a4a4a">Du &amp; Geschwister</text>
+
+      {/* "DU" marker on you */}
+      <rect x={186} y={404} width={48} height={22} rx={11} fill="#e84343" />
+      <text x={210} y={419} textAnchor="middle" fontSize={13} fontWeight={800} fill="#fff">DU</text>
+    </g>
+  );
+}
+
+// Emoji pictures: each item is drawn as a card with its emoji, so the picture reads at a glance
+function EmojiPicture({ items, kind }: { items: SceneItem[]; kind: 'animals' | 'transport' }) {
+  const isAnimal = kind === 'animals';
+  return (
+    <g>
+      {isAnimal ? (
+        <>
+          <rect x={0} y={0} width={420} height={320} fill="#d6f0ff" />
+          <circle cx={360} cy={60} r={30} fill="#ffe27a" />
+          <ellipse cx={210} cy={330} rx={420} ry={60} fill="#b7e4a0" />
+          <rect x={0} y={330} width={420} height={190} fill="#b7e4a0" />
+        </>
+      ) : (
+        <>
+          <rect x={0} y={0} width={420} height={360} fill="#e6f4ff" />
+          <circle cx={360} cy={60} r={30} fill="#ffe27a" />
+          <rect x={0} y={360} width={420} height={160} fill="#9aa5b1" />
+          {[0, 1, 2, 3].map((i) => (
+            <rect key={i} x={20 + i * 110} y={438} width={60} height={6} rx={3} fill="#f4f6f8" />
+          ))}
+        </>
+      )}
+      {items.map((item) => (
+        <g key={item.id}>
+          <rect x={item.x - 42} y={item.y - 42} width={84} height={84} rx={22} fill="#ffffff" stroke="#dfe6ee" strokeWidth={2} />
+          <text x={item.x} y={item.y + 2} textAnchor="middle" dominantBaseline="central" fontSize={54}>
+            {item.emoji}
+          </text>
+        </g>
+      ))}
+    </g>
+  );
+}
+
+export function SceneArt({ kind, items }: { kind: SceneKind; items: SceneItem[] }) {
   return (
     <svg className="scene-art" viewBox="0 0 420 520" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
       <rect width={420} height={520} rx={20} fill="#eef7ff" />
-      <ellipse cx={210} cy={504} rx={150} ry={10} fill="#cfe8ff" />
+      {kind !== 'animals' && kind !== 'transport' && <ellipse cx={210} cy={504} rx={150} ry={10} fill="#cfe8ff" />}
       {kind === 'house' && <House />}
       {kind === 'clothes' && <Person clothed />}
       {kind === 'clothes-female' && <FemalePerson />}
       {kind === 'body' && <Person clothed={false} />}
+      {kind === 'family' && <FamilyPicture />}
+      {(kind === 'animals' || kind === 'transport') && <EmojiPicture items={items} kind={kind} />}
     </svg>
   );
 }

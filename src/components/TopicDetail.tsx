@@ -2,6 +2,8 @@ import { useMemo } from 'react';
 import type { Level, LearnLanguage, TopicUnit, GrammarUnit, Flashcard } from '../types';
 import { grammarUnits, getTopics } from '../data/topics';
 import { useTTS } from '../hooks/useTTS';
+import { useGloss } from '../i18n/GlossContext';
+import { GlossToggle } from './GlossToggle';
 
 interface TopicDetailProps {
   level: Level;
@@ -22,6 +24,7 @@ const articleColor: Record<string, string> = {
 
 export function TopicDetail({ level, learnLang, topicId, isGrammar, onStartStudy, onStartQuiz, onStartMatch, onBack }: TopicDetailProps) {
   const { speak } = useTTS();
+  const { gloss } = useGloss();
 
   const topic: TopicUnit | undefined = useMemo(() => getTopics(learnLang, level).find((tp) => tp.id === topicId), [learnLang, level, topicId]);
   const grammar: GrammarUnit | undefined = isGrammar ? grammarUnits.find((g) => g.id === topicId) : undefined;
@@ -66,6 +69,8 @@ export function TopicDetail({ level, learnLang, topicId, isGrammar, onStartStudy
         </div>
       </div>
 
+      <GlossToggle />
+
       <div className="course-actions">
         <button className="course-action-btn flashcards-btn" onClick={() => onStartStudy(cards, isGrammar ? grammar?.title || '' : topic?.title || '')} disabled={cards.length === 0}>
           📚 Flashcards
@@ -108,7 +113,7 @@ export function TopicDetail({ level, learnLang, topicId, isGrammar, onStartStudy
               <span className="topic-word-article">{w.article}</span>
               <span className="topic-word-text">{w.word}</span>
               <span className="topic-word-plural">{w.plural}</span>
-              <span className="topic-word-translation">{w.translation}</span>
+              <span className="topic-word-translation" dir={gloss === 'ar' && w.ar ? 'rtl' : undefined}>{gloss === 'ar' && w.ar ? w.ar : w.translation}</span>
               <button className="topic-word-speak" onClick={() => speak(`${w.article} ${w.word}`.trim(), learnLang)}>🔊</button>
             </div>
           ))}

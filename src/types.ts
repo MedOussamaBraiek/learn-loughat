@@ -37,6 +37,7 @@ export interface TopicWord {
   article: string;
   plural: string;
   translation: string;
+  ar?: string;
 }
 
 export interface TopicUnit {

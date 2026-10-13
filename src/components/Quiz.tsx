@@ -11,20 +11,23 @@ interface QuizProps {
   learnLang: LearnLanguage;
   timed: boolean;
   topicWords?: TopicWord[];
+  // A fixed set of questions (used by the daily challenge); otherwise questions are generated
+  fixedQuestions?: Question[];
   onComplete: (answers: Answer[], questions: Question[]) => void;
   onBack: () => void;
 }
 
 const TIME_PER_QUESTION = 20;
 
-export function Quiz({ level, learnLang, timed, topicWords, onComplete, onBack }: QuizProps) {
+export function Quiz({ level, learnLang, timed, topicWords, fixedQuestions, onComplete, onBack }: QuizProps) {
   const { t } = useLang();
   const { speak } = useTTS();
-  const [quizQuestions] = useState(() =>
-    topicWords && topicWords.length > 0
+  const [quizQuestions] = useState(() => {
+    if (fixedQuestions && fixedQuestions.length > 0) return fixedQuestions;
+    return topicWords && topicWords.length > 0
       ? generateTopicQuestions(topicWords, level, 10, learnLang)
-      : getRandomQuestions(learnLang, level, 10)
-  );
+      : getRandomQuestions(learnLang, level, 10);
+  });
   const [currentIndex, setCurrentIndex] = useState(0);
   const [selectedAnswer, setSelectedAnswer] = useState<string | null>(null);
   const [isAnswered, setIsAnswered] = useState(false);

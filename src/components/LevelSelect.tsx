@@ -3,16 +3,13 @@ import type { Level, LearnLanguage } from '../types';
 import { useLang } from '../i18n/LanguageContext';
 import { LanguageSwitcher } from './LanguageSwitcher';
 import { LearnLangSelector } from './LearnLangSelector';
+import { signOut } from '../lib/rankings';
+import { supabase } from '../lib/supabase';
 
 interface LevelSelectProps {
   onSelect: (level: Level) => void;
-  onSyllabus: (level: Level) => void;
-  onStudy: (level: Level) => void;
-  onPictures: () => void;
   learnLang: LearnLanguage;
   onLearnLangChange: (lang: LearnLanguage) => void;
-  timed: boolean;
-  onTimedChange: (v: boolean) => void;
 }
 
 const levelNameKey: Record<string, string> = {
@@ -29,7 +26,8 @@ const levelDescKey: Record<string, string> = {
   B2: 'level.desc.b2',
 };
 
-export function LevelSelect({ onSelect, onSyllabus, onStudy, onPictures, learnLang, onLearnLangChange, timed, onTimedChange }: LevelSelectProps) {
+// Step 1 of the app: choose a language and a level. Step 2 (Hub) is what to do with it.
+export function LevelSelect({ onSelect, learnLang, onLearnLangChange }: LevelSelectProps) {
   const { t } = useLang();
 
   return (
@@ -41,49 +39,29 @@ export function LevelSelect({ onSelect, onSyllabus, onStudy, onPictures, learnLa
         <p className="app-subtitle">{t('app.subtitle')}</p>
       </div>
       <LearnLangSelector value={learnLang} onChange={onLearnLangChange} />
-
-      <div className="mode-toggles">
-        <button
-          className={`mode-pill ${!timed ? 'active' : ''}`}
-          onClick={() => onTimedChange(false)}
-        >
-          🏖️ Practice
-        </button>
-        <button
-          className={`mode-pill ${timed ? 'active exam' : ''}`}
-          onClick={() => onTimedChange(true)}
-        >
-          ⏱️ Exam
-        </button>
-      </div>
-
-      {learnLang === 'de' && (
-        <button className="picture-entry-btn" onClick={onPictures}>
-          🖼️ Picture Learning · Körper, Haus, Kleidung
-        </button>
+      {supabase && (
+        <div className="signout-row">
+          <span className="signout-text">You are signed in</span>
+          <button className="action-btn secondary signout-btn" onClick={() => { void signOut(); }}>
+            🚪 Sign out
+          </button>
+        </div>
       )}
 
+      <p className="step-label">Step 1 · Choose your level</p>
       <div className="level-cards">
         {levels.map((level) => (
-          <div
+          <button
             key={level.label}
-            className="level-card-wrapper"
+            className="level-card"
+            style={{ '--level-color': level.color } as React.CSSProperties}
+            onClick={() => onSelect(level.label)}
           >
-            <button
-              className="level-card"
-              style={{ '--level-color': level.color } as React.CSSProperties}
-              onClick={() => onSelect(level.label)}
-            >
-              <span className="level-badge">{level.label}</span>
-              <span className="level-name">{t(levelNameKey[level.label] as any)}</span>
-              <span className="level-desc">{t(levelDescKey[level.label] as any)}</span>
-              <span className="level-arrow">→ Open Course</span>
-            </button>
-            <div className="level-card-links">
-              <button className="level-link syllabus-link" style={{ '--level-color': level.color } as React.CSSProperties} onClick={() => onSyllabus(level.label)}>📋 Syllabus</button>
-              <button className="level-link study-link" style={{ '--level-color': level.color } as React.CSSProperties} onClick={() => onStudy(level.label)}>📚 Study</button>
-            </div>
-          </div>
+            <span className="level-badge">{level.label}</span>
+            <span className="level-name">{t(levelNameKey[level.label] as any)}</span>
+            <span className="level-desc">{t(levelDescKey[level.label] as any)}</span>
+            <span className="level-arrow">Choose →</span>
+          </button>
         ))}
       </div>
     </div>

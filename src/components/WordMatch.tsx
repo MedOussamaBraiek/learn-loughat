@@ -1,6 +1,8 @@
 import { useEffect, useMemo, useState } from 'react';
 import type { TopicUnit, LearnLanguage } from '../types';
 import { useTTS } from '../hooks/useTTS';
+import { useGloss } from '../i18n/GlossContext';
+import { GlossToggle } from './GlossToggle';
 
 interface WordMatchProps {
   topic: TopicUnit;
@@ -21,6 +23,9 @@ function shuffle<T>(items: T[]): T[] {
 
 export function WordMatch({ topic, learnLang, onBack }: WordMatchProps) {
   const { speak } = useTTS();
+  const { gloss } = useGloss();
+  // The meaning shown on the right: English or Arabic, never both
+  const meaningOf = (w: TopicUnit['words'][number]) => (gloss === 'ar' && w.ar ? w.ar : w.translation);
 
   // Split the shuffled topic into rounds of GROUP_SIZE pairs
   const groups = useMemo(() => {
@@ -77,6 +82,14 @@ export function WordMatch({ topic, learnLang, onBack }: WordMatchProps) {
   };
 
   const roundDone = group.length > 0 && matched.size === group.length;
+
+  // One clear instruction that always says what the next tap should be
+  const waitingLeft = selLeft === null && selRight !== null;
+  const waitingRight = selRight === null && selLeft !== null;
+  let instruction = 'Step 1: tap a German word on the left.';
+  if (wrongPair) instruction = '❌ Not a match. Try again.';
+  else if (selLeft !== null && selRight === null) instruction = `✅ You picked ${group[selLeft].article ? group[selLeft].article + ' ' : ''}${group[selLeft].word}. Now tap its English meaning on the right →`;
+  else if (selRight !== null && selLeft === null) instruction = `✅ You picked "${meaningOf(group[selRight])}". Now tap the German word on the left ←`;
   const isLastRound = groupIndex === groups.length - 1;
 
   const nextRound = () => {
@@ -105,10 +118,16 @@ export function WordMatch({ topic, learnLang, onBack }: WordMatchProps) {
           <p className="match-status">
             Round {groupIndex + 1} / {groups.length} · Mistakes: {mistakes}
           </p>
-          <p className="match-hint">Tap a German word, then its English meaning.</p>
+          <GlossToggle />
+          <p className={`match-step${wrongPair ? ' bad' : ''}`}>{instruction}</p>
+
+          <div className="match-headers">
+            <span>🇩🇪 Deutsch</span>
+            <span>🇬🇧 English</span>
+          </div>
 
           <div className="match-columns">
-            <div className="match-col">
+            <div className={`match-col${waitingLeft ? ' waiting' : ''}`}>
               {group.map((w, i) => {
                 const isMatched = matched.has(i);
                 const isSelected = selLeft === i;
@@ -126,7 +145,7 @@ export function WordMatch({ topic, learnLang, onBack }: WordMatchProps) {
               })}
             </div>
 
-            <div className="match-col">
+            <div className={`match-col${waitingRight ? ' waiting' : ''}`}>
               {rightOrder.map((k) => {
                 const isMatched = matched.has(k);
                 const isSelected = selRight === k;
@@ -138,7 +157,7 @@ export function WordMatch({ topic, learnLang, onBack }: WordMatchProps) {
                     onClick={() => pickRight(k)}
                     disabled={isMatched}
                   >
-                    {group[k].translation}
+                    <span dir={gloss === 'ar' && group[k].ar ? 'rtl' : undefined}>{meaningOf(group[k])}</span>
                   </button>
                 );
               })}
