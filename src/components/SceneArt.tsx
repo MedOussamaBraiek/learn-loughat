@@ -233,9 +233,9 @@ function FamilyPicture() {
 
 // Emoji pictures: each item is a card with its emoji. Animals and transport have their own backgrounds.
 function EmojiPicture({ items, kind }: { items: SceneItem[]; kind: string }) {
-  const tile = items.length > 10 ? 56 : 84;
+  const tile = items.length > 10 ? 56 : 92;
   const half = tile / 2;
-  const fontSize = Math.round(tile * 0.64);
+  const fontSize = Math.round(tile * 0.7);
   return (
     <g>
       {kind === 'animals' && (
