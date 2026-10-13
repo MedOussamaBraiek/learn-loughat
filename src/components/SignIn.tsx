@@ -48,6 +48,57 @@ export function SignIn() {
         <button className="action-btn primary landing-cta" onClick={start}>Sign in with Google to start</button>
       </section>
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+      <section className="landing-section">
+        <h2 className="landing-h2">Levels</h2>
+        <div className="landing-levels">
+          {levels.map((l) => (
+            <div key={l.label} className="landing-level">
+              <span className="level-badge">{l.label}</span>
+              <span>{l.name}</span>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <section className="landing-section">
+        <h2 className="landing-h2">How it works</h2>
+        <div className="landing-steps">
+          {steps.map((s) => (
+            <div key={s.n} className="landing-step">
+              <span className="landing-step-n">{s.n}</span>
+              <h3>{s.title}</h3>
+              <p>{s.text}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <section className="landing-section">
+        <h2 className="landing-h2">Rankings</h2>
+        <p className="landing-sub">Top learners in the daily challenge. Pick a level to see its ranking.</p>
+        <Leaderboard today={dayKey()} lang="de" initialLevel="A1" />
+      </section>
+
       <section className="landing-section">
         <h2 className="landing-h2">What you can do</h2>
         <div className="landing-features">
@@ -67,37 +118,6 @@ export function SignIn() {
         <div className="landing-pictures">
           {pictures.map((p) => (
             <span key={p.title} className="landing-chip">{p.icon} {p.title}</span>
-          ))}
-        </div>
-      </section>
-
-      <section className="landing-section">
-        <h2 className="landing-h2">Levels</h2>
-        <div className="landing-levels">
-          {levels.map((l) => (
-            <div key={l.label} className="landing-level">
-              <span className="level-badge">{l.label}</span>
-              <span>{l.name}</span>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      <section className="landing-section">
-        <h2 className="landing-h2">Rankings</h2>
-        <p className="landing-sub">Top learners in the daily challenge. Pick a level to see its ranking.</p>
-        <Leaderboard today={dayKey()} lang="de" initialLevel="A1" />
-      </section>
-
-      <section className="landing-section">
-        <h2 className="landing-h2">How it works</h2>
-        <div className="landing-steps">
-          {steps.map((s) => (
-            <div key={s.n} className="landing-step">
-              <span className="landing-step-n">{s.n}</span>
-              <h3>{s.title}</h3>
-              <p>{s.text}</p>
-            </div>
           ))}
         </div>
       </section>

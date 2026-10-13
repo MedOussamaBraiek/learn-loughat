@@ -5,6 +5,7 @@ import { currentUser, friendlyError, myAttempt, signInWithGoogle, signOut, submi
 import { supabase } from '../lib/supabase';
 import { Quiz } from './Quiz';
 import { Leaderboard } from './Leaderboard';
+import { shareRankCard } from '../lib/shareImage';
 
 interface DailyChallengeProps {
   learnLang: LearnLanguage;
@@ -33,6 +34,8 @@ export function DailyChallenge({ learnLang, level, onBack }: DailyChallengeProps
   const [signedIn, setSignedIn] = useState(false);
   const [startedAt, setStartedAt] = useState(0);
   const [result, setResult] = useState<Result | null>(null);
+  const [shareName, setShareName] = useState('Learner');
+  const [shareNote, setShareNote] = useState<string | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -50,6 +53,7 @@ export function DailyChallenge({ learnLang, level, onBack }: DailyChallengeProps
         return;
       }
       setSignedIn(true);
+      setShareName(user.user_metadata?.full_name || user.email || 'Learner');
       const attempt = await myAttempt(today, learnLang, level);
       if (cancelled) return;
       if (attempt) {
@@ -154,6 +158,28 @@ export function DailyChallenge({ learnLang, level, onBack }: DailyChallengeProps
             <p className="match-hint">in {result.seconds} seconds</p>
             {result.saved && <p className="scene-message ok">✅ Saved to the rankings</p>}
             {!result.saved && result.error && <p className="scene-message bad">{result.error}</p>}
+            {result.total > 0 && (
+              <button
+                className="action-btn primary daily-share"
+                onClick={() => {
+                  shareRankCard({
+                    title: `${level} · ${today}`,
+                    rows: [{
+                      nickname: shareName,
+                      days_played: 1,
+                      correct_total: result.correct,
+                      total_questions: result.total,
+                      pct: Math.round((1000 * result.correct) / result.total) / 10,
+                    }],
+                  })
+                    .then((r) => setShareNote(r === 'shared' ? 'Shared!' : 'Image saved. Post it anywhere!'))
+                    .catch((e: Error) => setShareNote(e.message));
+                }}
+              >
+                📸 Share my result
+              </button>
+            )}
+            {shareNote && <p className="match-hint">{shareNote}</p>}
             {!result.saved && !result.error && !supabase && (
               <p className="match-hint">Rankings are not set up yet, so this score is not saved.</p>
             )}

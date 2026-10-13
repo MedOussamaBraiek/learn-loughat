@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react';
 import type { Level } from '../types';
 import { friendlyError, leaderboard, type LeaderRow, type Period } from '../lib/rankings';
-import { shareRankCard } from '../lib/shareImage';
 import { supabase } from '../lib/supabase';
 
 interface LeaderboardProps {
@@ -19,15 +18,13 @@ const periods: { value: Period; label: string }[] = [
 const levels: Level[] = ['A1', 'A2', 'B1', 'B2'];
 const medals = ['🥇', '🥈', '🥉'];
 
-// Rankings for one level at a time: podium for the top 3, list below, and a shareable card
+// Rankings for one level at a time: podium for the top 3, then the list
 export function Leaderboard({ today, lang, initialLevel = 'A1' }: LeaderboardProps) {
   const [level, setLevel] = useState<Level>(initialLevel);
   const [period, setPeriod] = useState<Period>('today');
   const [rows, setRows] = useState<LeaderRow[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [shareNote, setShareNote] = useState<string | null>(null);
-  const [sharing, setSharing] = useState(false);
 
   useEffect(() => {
     if (!supabase) return;
@@ -49,19 +46,6 @@ export function Leaderboard({ today, lang, initialLevel = 'A1' }: LeaderboardPro
   const podium = rows.slice(0, 3);
   const rest = rows.slice(3);
 
-  const share = async () => {
-    // One share at a time: a second tap while the share sheet is open would fail
-    if (sharing) return;
-    setSharing(true);
-    try {
-      const result = await shareRankCard({ title: `${level} · ${periodLabel}`, rows });
-      setShareNote(result === 'shared' ? 'Shared!' : 'Image saved. Post it anywhere!');
-    } catch (e) {
-      setShareNote((e as Error).message);
-    } finally {
-      setSharing(false);
-    }
-  };
 
   return (
     <div className="leaderboard">
@@ -118,14 +102,6 @@ export function Leaderboard({ today, lang, initialLevel = 'A1' }: LeaderboardPro
         </ol>
       )}
 
-      {rows.length > 0 && (
-        <div className="lb-share">
-          <button className="action-btn primary lb-share-btn" disabled={sharing} onClick={() => { void share(); }}>
-            📸 Share this ranking
-          </button>
-          {shareNote && <p className="match-hint">{shareNote}</p>}
-        </div>
-      )}
     </div>
   );
 }
