@@ -19,6 +19,7 @@ const levelColors: Record<Level, string> = {
 // Learn: grammar as short rule cards, plus the der / die / das helper.
 // Word lists are in Quick memory.
 export function TopicCourse({ level, learnLang, onOpenGrammar, onOpenHelper, onBack }: TopicCourseProps) {
+  const visibleGrammar = grammarUnits.filter((g) => !g.levels || g.levels.includes(level));
   return (
     <div className="course-screen">
       <div className="course-header">
@@ -41,7 +42,7 @@ export function TopicCourse({ level, learnLang, onOpenGrammar, onOpenHelper, onB
       <h3 className="memory-section-title">📏 Grammar rules</h3>
       <p className="match-hint">{learnLang === 'de' ? 'Tap a rule to see the explanation and examples.' : 'Grammar rules are available for German.'}</p>
       <div className="rule-cards">
-        {grammarUnits.map((g, i) => (
+        {visibleGrammar.map((g, i) => (
           <button key={g.id} className="rule-card" onClick={() => onOpenGrammar(g.id)}>
             <span className="rule-card-num">{i + 1}</span>
             <span className="rule-card-icon">{g.icon}</span>

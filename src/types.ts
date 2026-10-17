@@ -60,6 +60,26 @@ export interface GrammarUnit {
   intro: string;
   points: string[];
   examples: GrammarExample[];
+  // When set, the unit only shows at these levels (undefined = all levels)
+  levels?: Level[];
+}
+
+// One important verb with everything you need to use it in the past and the imperative
+export interface PastVerb {
+  infinitive: string;
+  translation: string;
+  partizip: string;
+  auxiliary: 'haben' | 'sein';
+  praeteritum: string;
+  imperative: { du: string; ihr: string; sie: string };
+  example: { de: string; en: string };
+}
+
+// A short, friendly tip shown at the top of a tense section
+export interface AdviceCard {
+  icon: string;
+  title: string;
+  text: string;
 }
 
 export interface Flashcard {

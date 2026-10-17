@@ -15,6 +15,7 @@ import { CoursesPage } from './components/CoursesPage';
 import { DerDieDas } from './components/DerDieDas';
 import { Hub, type HubAction } from './components/Hub';
 import { GamesMenu } from './components/GamesMenu';
+import { VerbLab } from './components/VerbLab';
 import { TopicCourse } from './components/TopicCourse';
 import { TopicDetail } from './components/TopicDetail';
 import { Quiz } from './components/Quiz';
@@ -27,7 +28,7 @@ import { getTopics } from './data/topics';
 import './App.css';
 
 // levels -> hub -> (learn | pictures | games | quiz | test | syllabus | flashcards)
-type Screen = 'levels' | 'courses' | 'memory' | 'helper' | 'hub' | 'daily' | 'rankings' | 'admin' | 'topics' | 'topic' | 'games' | 'match' | 'pictures' | 'curriculum' | 'study' | 'quiz' | 'results';
+type Screen = 'levels' | 'courses' | 'memory' | 'helper' | 'hub' | 'daily' | 'rankings' | 'admin' | 'topics' | 'topic' | 'games' | 'match' | 'pictures' | 'curriculum' | 'study' | 'quiz' | 'results' | 'verbs';
 
 const rtlLangs = new Set(['ar']);
 
@@ -66,6 +67,9 @@ function AppContent({ isAdmin }: { isAdmin: boolean }) {
         break;
       case 'games':
         goTo('games');
+        break;
+      case 'verbs':
+        goTo('verbs');
         break;
       case 'quiz':
         setTimed(false);
@@ -213,6 +217,9 @@ function AppContent({ isAdmin }: { isAdmin: boolean }) {
           onPlayMatch={handlePlayMatch}
           onBack={handleBackToHub}
         />
+      )}
+      {screen === 'verbs' && (
+        <VerbLab onBack={handleBackToHub} />
       )}
       {screen === 'pictures' && (
         <PictureLearning

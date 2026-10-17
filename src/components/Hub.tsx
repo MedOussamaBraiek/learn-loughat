@@ -1,7 +1,7 @@
 import type { Level } from '../types';
 import { useTx, type UiKey } from '../i18n/uiText';
 
-export type HubAction = 'daily' | 'learn' | 'games' | 'quiz' | 'test' | 'syllabus' | 'flashcards';
+export type HubAction = 'daily' | 'learn' | 'games' | 'quiz' | 'test' | 'verbs' | 'syllabus' | 'flashcards';
 
 interface HubProps {
   level: Level;
@@ -9,10 +9,11 @@ interface HubProps {
   onBack: () => void;
 }
 
-const cards: { action: HubAction; icon: string; titleKey: UiKey; textKey: UiKey; color: string; germanOnly?: boolean; adminOnly?: boolean }[] = [
+const cards: { action: HubAction; icon: string; titleKey: UiKey; textKey: UiKey; color: string }[] = [
   { action: 'daily', icon: '🔥', titleKey: 'hub.daily', textKey: 'hub.dailyText', color: '#ff4b4b' },
   { action: 'learn', icon: '📖', titleKey: 'hub.learn', textKey: 'hub.learnText', color: '#1cb0f6' },
   { action: 'games', icon: '🎮', titleKey: 'hub.games', textKey: 'hub.gamesText', color: '#58cc02' },
+  { action: 'verbs', icon: '⏰', titleKey: 'hub.verbs', textKey: 'hub.verbsText', color: '#ff9600' },
   { action: 'quiz', icon: '📝', titleKey: 'hub.quiz', textKey: 'hub.quizText', color: '#ce82ff' },
   { action: 'test', icon: '⏱️', titleKey: 'hub.test', textKey: 'hub.testText', color: '#ff4b4b' },
 ];
@@ -47,10 +48,10 @@ export function Hub({ level, onAction, onBack }: HubProps) {
         ))}
       </div>
 
-      <p className="step-label">Extra tools</p>
+      <p className="step-label">{tx('hub.extra')}</p>
       <div className="hub-extras">
-        <button className="action-btn secondary" onClick={() => onAction('syllabus')}>📋 Syllabus</button>
-        <button className="action-btn secondary" onClick={() => onAction('flashcards')}>📚 All flashcards</button>
+        <button className="action-btn secondary" onClick={() => onAction('syllabus')}>{tx('hub.syllabus')}</button>
+        <button className="action-btn secondary" onClick={() => onAction('flashcards')}>{tx('hub.flashcards')}</button>
       </div>
     </div>
   );

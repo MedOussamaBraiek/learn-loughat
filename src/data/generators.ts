@@ -1,5 +1,6 @@
-import type { Question, LearnLanguage, Level } from '../types';
+import type { Question, LearnLanguage, Level, PastVerb } from '../types';
 import { vocab, randomItem, shuffle } from './vocabulary';
+import { importantVerbs, type VerbGameKind } from './verbs';
 
 let genIdCounter = 1000;
 function nextId() {
@@ -347,5 +348,130 @@ export function generateTopicQuestions(
   const conjugationPool = generateQuestions(lang, level, Math.ceil(count / 3)).filter((q) => q.category === 'Verbs' || q.category === 'Sentence Structure');
   generated.push(...conjugationPool);
 
+  return shuffle(generated).slice(0, count);
+}
+
+// --- Past tense & imperative games (German, from the important-verbs table) ---
+//
+// The distractors are plausible WRONG forms of the SAME verb (e.g. for bleiben:
+// gebleibt, gebleiben, blieb) so the learner must really know the form instead of
+// just spotting which word belongs to another verb.
+
+const SEPARABLE_PREFIXES = ['zurück', 'zusammen', 'durch', 'über', 'unter', 'an', 'auf', 'aus', 'ein', 'mit', 'zu', 'ab', 'bei', 'vor', 'um', 'nach', 'her', 'hin', 'los', 'fest', 'frei'];
+const INSEPARABLE_PREFIXES = ['be', 'emp', 'ent', 'er', 'ver', 'miss', 'zer'];
+
+function separablePrefix(inf: string): string | null {
+  for (const p of SEPARABLE_PREFIXES) {
+    if (inf.startsWith(p) && inf.length > p.length + 3) return p;
+  }
+  return null;
+}
+
+// Infinitive without its ending (bleiben → bleib, arbeiten → arbeit, sein → sei).
+function verbStem(inf: string): string {
+  if (inf.endsWith('en')) return inf.slice(0, -2);
+  if (inf.endsWith('n')) return inf.slice(0, -1);
+  return inf;
+}
+
+// Bare du-imperative stem, with a separable prefix kept at the end (rufen → ruf an).
+function bareDu(v: PastVerb): string {
+  const sep = separablePrefix(v.infinitive);
+  if (sep) return `${verbStem(v.infinitive.slice(sep.length))} ${sep}`;
+  return verbStem(v.infinitive);
+}
+
+// A guessed weak "ge + stem + ending" form (gemacht, gearbeit, angeruft).
+function weakForm(v: PastVerb, ending: 't' | 'en'): string {
+  const sep = separablePrefix(v.infinitive);
+  if (sep) return `${sep}ge${verbStem(v.infinitive.slice(sep.length))}${ending}`;
+  const root = verbStem(v.infinitive);
+  const inseparable = INSEPARABLE_PREFIXES.some((p) => v.infinitive.startsWith(p) && v.infinitive.length > p.length + 2);
+  return inseparable ? `${root}${ending}` : `ge${root}${ending}`;
+}
+
+// First `count` candidates that are not the correct answer and not duplicates.
+function uniqueWrongs(candidates: string[], correct: string, count = 3): string[] {
+  const out: string[] = [];
+  for (const c of candidates) {
+    if (c && c !== correct && !out.includes(c)) out.push(c);
+    if (out.length === count) break;
+  }
+  return out;
+}
+
+function partizipQuestion(v: PastVerb): Question | null {
+  const wrong = uniqueWrongs([v.infinitive, v.praeteritum, weakForm(v, 't'), weakForm(v, 'en')], v.partizip);
+  if (wrong.length < 3) return null;
+  return {
+    id: nextId(),
+    type: 'multiple-choice',
+    question: `Partizip II von "${v.infinitive}"?`,
+    options: shuffle([v.partizip, ...wrong]),
+    correctAnswer: v.partizip,
+    explanation: `Perfekt mit "${v.auxiliary}": ${v.example.de}`,
+    category: 'Verbs · Perfekt',
+  };
+}
+
+function auxiliaryQuestion(v: PastVerb): Question | null {
+  const correct = v.auxiliary === 'sein' ? 'bin' : 'habe';
+  const fakes = v.auxiliary === 'sein' ? ['habe', 'hat', 'ist'] : ['bin', 'ist', 'hat'];
+  return {
+    id: nextId(),
+    type: 'multiple-choice',
+    question: `Perfekt: Ich ___ ${v.partizip}. (${v.infinitive})`,
+    options: shuffle([correct, ...fakes]),
+    correctAnswer: correct,
+    explanation: `"${v.infinitive}" bildet das Perfekt mit "${v.auxiliary}". ${v.example.de}`,
+    category: 'Verbs · Perfekt',
+  };
+}
+
+function praeteritumQuestion(v: PastVerb): Question | null {
+  const sep = separablePrefix(v.infinitive);
+  const root = sep ? `${sep}${verbStem(v.infinitive.slice(sep.length))}` : verbStem(v.infinitive);
+  const regular = root + (root.endsWith('t') || root.endsWith('d') ? 'ete' : 'te');
+  const variant = v.praeteritum.endsWith('te') ? v.praeteritum.slice(0, -1) : `${v.praeteritum}te`;
+  const wrong = uniqueWrongs([v.infinitive, v.partizip, regular, variant], v.praeteritum);
+  if (wrong.length < 3) return null;
+  return {
+    id: nextId(),
+    type: 'multiple-choice',
+    question: `Präteritum: "${v.infinitive}" → ich ___`,
+    options: shuffle([v.praeteritum, ...wrong]),
+    correctAnswer: v.praeteritum,
+    explanation: `"${v.infinitive}" im Präteritum: ich ${v.praeteritum}.`,
+    category: 'Verbs · Präteritum',
+  };
+}
+
+function imperativeQuestion(v: PastVerb): Question | null {
+  const bare = bareDu(v);
+  const wrong = uniqueWrongs([v.imperative.ihr, `${bare}st`, bare, v.infinitive], v.imperative.du);
+  if (wrong.length < 3) return null;
+  return {
+    id: nextId(),
+    type: 'multiple-choice',
+    question: `Imperativ (du): "${v.infinitive}" → ___`,
+    options: shuffle([v.imperative.du, ...wrong]),
+    correctAnswer: v.imperative.du,
+    explanation: `"${v.infinitive}" → du: "${v.imperative.du}".`,
+    category: 'Verbs · Imperativ',
+  };
+}
+
+export function generateVerbQuestions(kind: VerbGameKind, count: number): Question[] {
+  const generated: Question[] = [];
+  const guard = count * 40;
+  for (let i = 0; i < guard && generated.length < count; i++) {
+    const v = randomItem(importantVerbs);
+    const q =
+      kind === 'perfekt' ? partizipQuestion(v)
+        : kind === 'auxiliary' ? auxiliaryQuestion(v)
+          : kind === 'praeteritum' ? praeteritumQuestion(v)
+            : imperativeQuestion(v);
+    if (q && !generated.some((g) => g.question === q.question)) generated.push(q);
+  }
   return shuffle(generated).slice(0, count);
 }
