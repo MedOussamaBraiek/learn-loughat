@@ -24,6 +24,10 @@ export const wordEmoji: Record<string, string> = {
   Stadt: '🏙️', Straße: '🛣️', Platz: '⛲', Kirche: '⛪', Rathaus: '🏛️', Museum: '🖼️', Kino: '🎬',
   Theater: '🎭', Bibliothek: '📚', Supermarkt: '🛒', Apotheke: '💊', Schule: '🏫', Bank: '🏦',
   Restaurant: '🍽️', Park: '🌳',
+  // Directions
+  links: '⬅️', rechts: '➡️', geradeaus: '⬆️', vorne: '🔼', hinten: '🔽', oben: '⤴️', unten: '⤵️',
+  neben: '↔️', zwischen: '↔️', gegenüber: '🔄', nah: '📍', weit: '🛣️', Ecke: '📐', Kreuzung: '➕',
+  Ampel: '🚦', Weg: '🛤️', Haltestelle: '🚏', Eingang: '🚪', Richtung: '🧭',
   // Weather and nature
   Wetter: '🌤️', Sonne: '☀️', Regen: '🌧️', Schnee: '❄️', Wind: '💨', Wolke: '☁️', Nebel: '🌫️',
   Regenbogen: '🌈', Blitz: '⚡', Gewitter: '⛈️', Baum: '🌳', Blume: '🌸', Berg: '⛰️', Fluss: '🏞️',

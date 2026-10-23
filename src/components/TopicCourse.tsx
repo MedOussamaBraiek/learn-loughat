@@ -1,10 +1,13 @@
 import type { Level, LearnLanguage } from '../types';
 import { grammarUnits } from '../data/topics';
+import { getDialogs } from '../data/dialogs';
+import { useTx } from '../i18n/uiText';
 
 interface TopicCourseProps {
   level: Level;
   learnLang: LearnLanguage;
   onOpenGrammar: (grammarId: string) => void;
+  onOpenDialog: (dialogId: string) => void;
   onOpenHelper: () => void;
   onBack: () => void;
 }
@@ -16,10 +19,12 @@ const levelColors: Record<Level, string> = {
   B2: '#ce82ff',
 };
 
-// Learn: grammar as short rule cards, plus the der / die / das helper.
+// Learn: dialogues, grammar as short rule cards, plus the der / die / das helper.
 // Word lists are in Quick memory.
-export function TopicCourse({ level, learnLang, onOpenGrammar, onOpenHelper, onBack }: TopicCourseProps) {
+export function TopicCourse({ level, learnLang, onOpenGrammar, onOpenDialog, onOpenHelper, onBack }: TopicCourseProps) {
+  const tx = useTx();
   const visibleGrammar = grammarUnits.filter((g) => !g.levels || g.levels.includes(level));
+  const dialogues = getDialogs(level);
   return (
     <div className="course-screen">
       <div className="course-header">
@@ -38,6 +43,25 @@ export function TopicCourse({ level, learnLang, onOpenGrammar, onOpenHelper, onB
         </span>
         <span>→</span>
       </button>
+
+      {dialogues.length > 0 && (
+        <>
+          <h3 className="memory-section-title">💬 {tx('dialogues.section')}</h3>
+          <p className="match-hint">{tx('dialogues.intro')}</p>
+          <div className="rule-cards">
+            {dialogues.map((d) => (
+              <button key={d.id} className="rule-card" onClick={() => onOpenDialog(d.id)}>
+                <span className="rule-card-icon">{d.icon}</span>
+                <span className="rule-card-text">
+                  <strong>{d.title}</strong>
+                  <span>{d.lines.length} lines · {d.place}</span>
+                </span>
+                <span>→</span>
+              </button>
+            ))}
+          </div>
+        </>
+      )}
 
       <h3 className="memory-section-title">📏 Grammar rules</h3>
       <p className="match-hint">{learnLang === 'de' ? 'Tap a rule to see the explanation and examples.' : 'Grammar rules are available for German.'}</p>

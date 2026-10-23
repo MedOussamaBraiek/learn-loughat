@@ -127,7 +127,7 @@ export const pictureScenes: SceneInfo[] = [
 ];
 
 // Word lists turned into pictures. Each word is a card with its picture, laid out in two columns.
-const pictureTopicIds = ['party', 'sport', 'health', 'food', 'travel', 'city', 'weather', 'colors', 'time', 'numbers', 'emotions', 'travel-a2', 'work-a2'];
+const pictureTopicIds = ['party', 'sport', 'health', 'food', 'travel', 'city', 'weather', 'colors', 'time', 'numbers', 'emotions', 'travel-a2', 'work-a2', 'directions'];
 
 function gridLayout(words: { id: string; en: string; ar: string; emoji: string }[]): SceneItem[] {
   const rows = Math.ceil(words.length / 2);

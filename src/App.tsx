@@ -16,6 +16,7 @@ import { DerDieDas } from './components/DerDieDas';
 import { Hub, type HubAction } from './components/Hub';
 import { GamesMenu } from './components/GamesMenu';
 import { VerbLab } from './components/VerbLab';
+import { DialogChat } from './components/DialogChat';
 import { TopicCourse } from './components/TopicCourse';
 import { TopicDetail } from './components/TopicDetail';
 import { Quiz } from './components/Quiz';
@@ -28,7 +29,7 @@ import { getTopics } from './data/topics';
 import './App.css';
 
 // levels -> hub -> (learn | pictures | games | quiz | test | syllabus | flashcards)
-type Screen = 'levels' | 'courses' | 'memory' | 'helper' | 'hub' | 'daily' | 'rankings' | 'admin' | 'topics' | 'topic' | 'games' | 'match' | 'pictures' | 'curriculum' | 'study' | 'quiz' | 'results' | 'verbs';
+type Screen = 'levels' | 'courses' | 'memory' | 'helper' | 'hub' | 'daily' | 'rankings' | 'admin' | 'topics' | 'topic' | 'dialog' | 'games' | 'match' | 'pictures' | 'curriculum' | 'study' | 'quiz' | 'results' | 'verbs';
 
 const rtlLangs = new Set(['ar']);
 
@@ -42,6 +43,7 @@ function AppContent({ isAdmin }: { isAdmin: boolean }) {
   const [completedQuestions, setCompletedQuestions] = useState<Question[]>([]);
   const [completedAnswers, setCompletedAnswers] = useState<Answer[]>([]);
   const [activeTopicId, setActiveTopicId] = useState('');
+  const [activeDialogId, setActiveDialogId] = useState('');
   const [activeIsGrammar, setActiveIsGrammar] = useState(false);
   const [studyCards, setStudyCards] = useState<Flashcard[]>([]);
   const [studyTitle, setStudyTitle] = useState('');
@@ -109,6 +111,11 @@ function AppContent({ isAdmin }: { isAdmin: boolean }) {
     goTo('match');
   };
 
+  const handleOpenDialog = (dialogId: string) => {
+    setActiveDialogId(dialogId);
+    goTo('dialog');
+  };
+
   const handleStartTopicStudy = (cards: Flashcard[], title: string) => {
     setStudyCards(cards);
     setStudyTitle(title);
@@ -172,6 +179,7 @@ function AppContent({ isAdmin }: { isAdmin: boolean }) {
           level={level}
           learnLang={learnLang}
           onOpenGrammar={handleOpenGrammar}
+          onOpenDialog={handleOpenDialog}
           onOpenHelper={() => goTo('helper')}
           onBack={handleBackToHub}
         />
@@ -199,6 +207,9 @@ function AppContent({ isAdmin }: { isAdmin: boolean }) {
       )}
       {screen === 'rankings' && (
         <RankingsPage learnLang={learnLang} onBack={() => setScreen('levels')} />
+      )}
+      {screen === 'dialog' && (
+        <DialogChat dialogId={activeDialogId} onBack={() => setScreen('topics')} />
       )}
       {screen === 'admin' && isAdmin && (
         <AdminUsers onBack={() => setScreen('levels')} />

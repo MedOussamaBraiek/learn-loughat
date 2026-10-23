@@ -318,6 +318,30 @@ export const topicUnits: Partial<Record<LearnLanguage, Partial<Record<Level, Top
   de: {
     A1: [
       {
+        id: 'directions',
+        title: 'Directions & Places',
+        icon: '🧭',
+        color: '#ff9600',
+        words: [
+          { word: 'links', article: '', plural: '', translation: 'left', ar: 'يسار' },
+          { word: 'rechts', article: '', plural: '', translation: 'right', ar: 'يمين' },
+          { word: 'geradeaus', article: '', plural: '', translation: 'straight ahead', ar: 'إلى الأمام مباشرة' },
+          { word: 'vorne', article: '', plural: '', translation: 'in front', ar: 'في الأمام' },
+          { word: 'hinten', article: '', plural: '', translation: 'behind', ar: 'في الخلف' },
+          { word: 'oben', article: '', plural: '', translation: 'up / upstairs', ar: 'أعلى' },
+          { word: 'unten', article: '', plural: '', translation: 'down / downstairs', ar: 'أسفل' },
+          { word: 'neben', article: '', plural: '', translation: 'next to', ar: 'بجانب' },
+          { word: 'zwischen', article: '', plural: '', translation: 'between', ar: 'بين' },
+          { word: 'gegenüber', article: '', plural: '', translation: 'opposite', ar: 'مقابل' },
+          { word: 'nah', article: '', plural: '', translation: 'near', ar: 'قريب' },
+          { word: 'weit', article: '', plural: '', translation: 'far', ar: 'بعيد' },
+          { word: 'Straße', article: 'die', plural: 'Straßen', translation: 'street', ar: 'شارع' },
+          { word: 'Ecke', article: 'die', plural: 'Ecken', translation: 'corner', ar: 'زاوية' },
+          { word: 'Kreuzung', article: 'die', plural: 'Kreuzungen', translation: 'crossroads', ar: 'تقاطع' },
+          { word: 'Ampel', article: 'die', plural: 'Ampeln', translation: 'traffic light', ar: 'إشارة مرور' },
+        ],
+      },
+      {
         id: 'house',
         title: 'House & Home',
         icon: '🏠',

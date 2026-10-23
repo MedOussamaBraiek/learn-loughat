@@ -44,6 +44,12 @@ const text = {
   'hub.flashcards': ['📚 All flashcards', '📚 Toutes les cartes', '📚 Alle Karteikarten', '📚 كل البطاقات'],
   'hub.extra': ['Extra tools', 'Outils supplémentaires', 'Extra-Werkzeuge', 'أدوات إضافية'],
 
+  // Dialogues
+  'dialogues.section': ['Dialogues', 'Dialogues', 'Dialoge', 'حوارات'],
+  'dialogues.intro': ['Read a real conversation, then practise the phrases.', 'Lis une vraie conversation, puis entraîne les phrases.', 'Lies ein echtes Gespräch und übe dann die Sätze.', 'اقرأ محادثة حقيقية ثم تدرّب على العبارات.'],
+  'dialogues.play': ['Play the phrase game', 'Jouer au jeu des phrases', 'Sprachspiel spielen', 'العب لعبة العبارات'],
+  'dialogues.listen': ['Listen', 'Écouter', 'Anhören', 'اسمع'],
+
   // Quick memory / pictures
   'pic.title': ['🖼️ Picture Learning', '🖼️ Apprentissage en images', '🖼️ Lernen mit Bildern', '🖼️ التعلم بالصور'],
   'pic.hint': ['Pick a picture. Learn the words with arrows, then play to test yourself.', 'Choisis une image. Apprends les mots avec les flèches, puis joue pour te tester.', 'Wähle ein Bild. Lerne die Wörter mit Pfeilen, dann spiele zum Testen.', 'اختر صورة. تعلم الكلمات بالأسهم، ثم العب لتختبر نفسك.'],
