@@ -152,7 +152,20 @@ function AppContent({ isAdmin }: { isAdmin: boolean }) {
   const currentTopic = currentTopicUnit?.words;
 
   return (
-    <div className="app-container" dir={rtlLangs.has(lang) ? 'rtl' : 'ltr'}>
+    <div className="app-root">
+      <nav className="app-navbar">
+        <div className="app-navbar-container">
+          <div className="app-navbar-logo" onClick={() => setScreen('levels')} style={{ cursor: 'pointer' }}>
+            <span className="app-navbar-logo-text">Learn Loughat</span>
+          </div>
+          <div className="app-navbar-actions">
+            {supabase ? (
+              <button className="app-navbar-btn" onClick={(e) => { e.preventDefault(); e.stopPropagation(); void import('./lib/rankings').then(m => { m.signOut(); window.location.reload(); }); }}>Disconnect</button>
+            ) : null}
+          </div>
+        </div>
+      </nav>
+      <div className="app-container" style={{ paddingTop: '80px' }} dir={rtlLangs.has(lang) ? 'rtl' : 'ltr'}>
       {screen === 'levels' && (
         <LevelSelect
           learnLang={learnLang}
@@ -283,23 +296,37 @@ function AppContent({ isAdmin }: { isAdmin: boolean }) {
           onBackToLevels={handleBackToHub}
         />
       )}
+      </div>
     </div>
   );
 }
 
-// Sign-in comes first: nobody uses the app until they are signed in (when Supabase is configured)
+// Landing page is always the entry point with navbar showing auth state
 function AppGate() {
   const auth = useAuthUser();
+  const [showApp, setShowApp] = useState(false);
+
   if (!auth.ready) {
-    return <div className="app-container"><p className="match-hint">Loading…</p></div>;
+    return <SignIn showApp={false} onEnterApp={() => setShowApp(true)} />;
   }
-  if (supabase && !auth.user) {
-    return <div className="app-container"><SignIn /></div>;
-  }
+
   if (auth.user && auth.blocked) {
     return <div className="app-container"><Blocked /></div>;
   }
-  return <AppContent isAdmin={isAdminEmail(auth.user?.email)} />;
+
+  if (showApp) {
+    if (auth.user) {
+      return <AppContent isAdmin={isAdminEmail(auth.user?.email)} />;
+    }
+    if (!supabase) {
+      return <AppContent isAdmin={false} />;
+    }
+    // If supabase configured but not logged in, stay on landing
+    setShowApp(false);
+    return <SignIn showApp={!!auth.user} onEnterApp={() => setShowApp(true)} />;
+  }
+
+  return <SignIn showApp={!!auth.user} onEnterApp={() => setShowApp(true)} />;
 }
 
 export default function App() {

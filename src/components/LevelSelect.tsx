@@ -35,9 +35,10 @@ export function LevelSelect({ learnLang, onLearnLangChange, onCourses, onMemory,
       </div>
 
       <div className="level-header">
+        <div className="level-header-badge">🇩🇪 Learn German</div>
         <span className="owl-icon">🦉</span>
-        <h1 className="app-title">{t('app.title')}</h1>
-        <p className="app-subtitle">{t('app.subtitle')}</p>
+        <h1 className="app-title">Learn Loughat</h1>
+        <p className="app-subtitle">Your journey to German fluency starts here</p>
       </div>
       <div className="home-lang">
         <LearnLangSelector value={learnLang} onChange={onLearnLangChange} />
@@ -47,16 +48,16 @@ export function LevelSelect({ learnLang, onLearnLangChange, onCourses, onMemory,
 
       <div className="home-entries">
         <button className="home-entry memory" onClick={onMemory}>
-          <span className="home-entry-icon">⚡</span>
+          <span className="home-entry-icon">🖼️</span>
           <span className="home-entry-title">{tx('home.memory')}</span>
           <span className="home-entry-text">{tx('home.memoryText')}</span>
-          <span className="home-entry-go">{tx('home.start')}</span>
+          <span className="home-entry-go">{tx('home.start')} →</span>
         </button>
         <button className="home-entry courses" onClick={onCourses}>
           <span className="home-entry-icon">🎓</span>
           <span className="home-entry-title">{tx('home.courses')}</span>
           <span className="home-entry-text">{tx('home.coursesText')}</span>
-          <span className="home-entry-go">{tx('home.chooseLevel')}</span>
+          <span className="home-entry-go">{tx('home.chooseLevel')} →</span>
         </button>
       </div>
     </div>
