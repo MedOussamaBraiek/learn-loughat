@@ -1,11 +1,8 @@
 import type { LearnLanguage } from '../types';
-import { useLang } from '../i18n/LanguageContext';
-import { LanguageSwitcher } from './LanguageSwitcher';
 import { LearnLangSelector } from './LearnLangSelector';
-import { signOut } from '../lib/rankings';
-import { supabase } from '../lib/supabase';
 import { TopThree } from './TopThree';
 import { useTx } from '../i18n/uiText';
+import { Icon } from './Icon';
 
 interface LevelSelectProps {
   learnLang: LearnLanguage;
@@ -13,33 +10,26 @@ interface LevelSelectProps {
   onCourses: () => void;
   onMemory: () => void;
   onRankings: () => void;
-  onAdmin: () => void;
-  isAdmin: boolean;
 }
 
-// Home: account bar, top learners, then two big entries: quick memory and courses
-export function LevelSelect({ learnLang, onLearnLangChange, onCourses, onMemory, onRankings, onAdmin, isAdmin }: LevelSelectProps) {
-  const { t } = useLang();
+// Home: top learners, then two big entries: quick memory and courses
+export function LevelSelect({ learnLang, onLearnLangChange, onCourses, onMemory, onRankings }: LevelSelectProps) {
   const tx = useTx();
 
   return (
     <div className="level-screen">
-      <div className="account-bar">
-        {supabase ? (
-          <button className="account-btn" onClick={() => { void signOut(); }}>{tx('home.signOut')}</button>
-        ) : <span />}
-        <div className="account-bar-right">
-          {isAdmin && <button className="account-btn admin-entry" onClick={onAdmin}>{tx('home.admin')}</button>}
-          <LanguageSwitcher />
-        </div>
-      </div>
-
       <div className="level-header">
-        <div className="level-header-badge">🇩🇪 Learn German</div>
-        <span className="owl-icon">🦉</span>
+        <div className="level-header-badge">
+          <Icon name="flag" size={14} />
+          Learn German · A1–B2
+        </div>
+        <span className="level-mark">
+          <Icon name="bookOpen" size={34} />
+        </span>
         <h1 className="app-title">Learn Loughat</h1>
         <p className="app-subtitle">Your journey to German fluency starts here</p>
       </div>
+
       <div className="home-lang">
         <LearnLangSelector value={learnLang} onChange={onLearnLangChange} />
       </div>
@@ -47,17 +37,27 @@ export function LevelSelect({ learnLang, onLearnLangChange, onCourses, onMemory,
       <TopThree onOpenRankings={onRankings} />
 
       <div className="home-entries">
-        <button className="home-entry memory" onClick={onMemory}>
-          <span className="home-entry-icon">🖼️</span>
+        <button type="button" className="home-entry memory" onClick={onMemory}>
+          <span className="home-entry-icon">
+            <Icon name="image" size={24} />
+          </span>
           <span className="home-entry-title">{tx('home.memory')}</span>
           <span className="home-entry-text">{tx('home.memoryText')}</span>
-          <span className="home-entry-go">{tx('home.start')} →</span>
+          <span className="home-entry-go">
+            {tx('home.start')}
+            <Icon name="arrowRight" size={16} />
+          </span>
         </button>
-        <button className="home-entry courses" onClick={onCourses}>
-          <span className="home-entry-icon">🎓</span>
+        <button type="button" className="home-entry courses" onClick={onCourses}>
+          <span className="home-entry-icon">
+            <Icon name="graduation" size={24} />
+          </span>
           <span className="home-entry-title">{tx('home.courses')}</span>
           <span className="home-entry-text">{tx('home.coursesText')}</span>
-          <span className="home-entry-go">{tx('home.chooseLevel')} →</span>
+          <span className="home-entry-go">
+            {tx('home.chooseLevel')}
+            <Icon name="arrowRight" size={16} />
+          </span>
         </button>
       </div>
     </div>

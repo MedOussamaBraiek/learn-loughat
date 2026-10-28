@@ -6,6 +6,8 @@ import { useTx } from '../i18n/uiText';
 import { GlossToggle } from './GlossToggle';
 import { PersonSprite, SceneBackdrop } from './DialogScene';
 import { DialogGame } from './DialogGame';
+import { Icon } from './Icon';
+import { Pictogram } from './Pictogram';
 
 interface DialogChatProps {
   dialogId: string;
@@ -24,10 +26,12 @@ export function DialogChat({ dialogId, onBack }: DialogChatProps) {
     return (
       <div className="course-screen">
         <div className="course-header">
-          <button className="back-btn" onClick={onBack}>←</button>
+          <button type="button" className="back-btn" onClick={onBack} aria-label={tx('common.back')}>
+            <Icon name="arrowLeft" size={20} />
+          </button>
           <h2 className="course-title">Not found</h2>
         </div>
-        <button className="action-btn secondary" onClick={onBack}>{tx('common.back')}</button>
+        <button type="button" className="action-btn secondary" onClick={onBack}>{tx('common.back')}</button>
       </div>
     );
   }
@@ -48,9 +52,11 @@ export function DialogChat({ dialogId, onBack }: DialogChatProps) {
 
       <div className="dialog-overlay">
         <header className="dialog-top">
-          <button className="dialog-back" onClick={onBack} aria-label={tx('common.back')}>←</button>
+          <button type="button" className="dialog-back" onClick={onBack} aria-label={tx('common.back')}>
+            <Icon name="arrowLeft" size={20} />
+          </button>
           <div className="dialog-title-wrap">
-            <span className="dialog-icon">{dialog.icon}</span>
+            <span className="dialog-icon"><Pictogram emoji={dialog.icon} size={20} /></span>
             <h2>{dialog.title}</h2>
           </div>
           <div className="dialog-top-gloss">
@@ -68,7 +74,9 @@ export function DialogChat({ dialogId, onBack }: DialogChatProps) {
                   <div className="dialog-bubble">
                     <div className="dialog-say">
                       <strong className="dialog-name">{name}</strong>
-                      <button className="speak-btn-small" onClick={() => speak(line.de, 'de')} title={tx('dialogues.listen')}>🔊</button>
+                      <button type="button" className="speak-btn-small" onClick={() => speak(line.de, 'de')} aria-label={tx('dialogues.listen')}>
+                        <Icon name="volume" size={15} />
+                      </button>
                     </div>
                     <p className="dialog-de" dir="ltr">{line.de}</p>
                     <p className="dialog-tr" dir={gloss === 'ar' ? 'rtl' : 'ltr'}>{gloss === 'ar' ? line.ar : line.en}</p>
@@ -80,7 +88,10 @@ export function DialogChat({ dialogId, onBack }: DialogChatProps) {
         </div>
 
         <footer className="dialog-footer">
-          <button className="next-btn active dialog-play" onClick={() => setPlaying(true)}>🎮 {tx('dialogues.play')}</button>
+          <button type="button" className="next-btn active dialog-play" onClick={() => setPlaying(true)}>
+            <Icon name="gamepad" size={18} />
+            {tx('dialogues.play')}
+          </button>
         </footer>
       </div>
     </div>

@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { adminDeleteUser, adminListUsers, adminSetBlocked, type AdminUser } from '../lib/admin';
 import { friendlyError } from '../lib/rankings';
+import { Icon } from './Icon';
 
 interface AdminUsersProps {
   onBack: () => void;
@@ -84,30 +85,48 @@ export function AdminUsers({ onBack }: AdminUsersProps) {
   return (
     <div className="course-screen admin-page">
       <div className="course-header">
-        <button className="back-btn" onClick={onBack}>←</button>
+        <button type="button" className="back-btn" onClick={onBack} aria-label="Back">
+          <Icon name="arrowLeft" size={20} />
+        </button>
         <div className="course-header-center">
-          <span className="course-unit-icon big">🛠️</span>
+          <span className="course-unit-icon big"><Icon name="shield" size={26} /></span>
           <h2 className="course-title">Admin</h2>
         </div>
       </div>
 
       <div className="admin-stats">
-        <div className="admin-stat"><strong>{stats.users}</strong><span>Users</span></div>
-        <div className="admin-stat"><strong>{stats.blocked}</strong><span>Blocked</span></div>
-        <div className="admin-stat"><strong>{stats.attempts}</strong><span>Challenges played</span></div>
+        <div className="admin-stat">
+          <span className="admin-stat-icon"><Icon name="users" size={20} /></span>
+          <strong>{stats.users}</strong>
+          <span>Users</span>
+        </div>
+        <div className="admin-stat">
+          <span className="admin-stat-icon danger"><Icon name="ban" size={20} /></span>
+          <strong>{stats.blocked}</strong>
+          <span>Blocked</span>
+        </div>
+        <div className="admin-stat">
+          <span className="admin-stat-icon"><Icon name="chart" size={20} /></span>
+          <strong>{stats.attempts}</strong>
+          <span>Challenges played</span>
+        </div>
       </div>
 
-      <input
-        className="admin-search"
-        type="search"
-        placeholder="🔍 Search by email or name"
-        value={query}
-        onChange={(e) => { setQuery(e.target.value); setPage(0); }}
-      />
+      <div className="search-field">
+        <Icon name="search" size={18} />
+        <input
+          className="admin-search"
+          type="search"
+          placeholder="Search by email or name"
+          value={query}
+          onChange={(e) => { setQuery(e.target.value); setPage(0); }}
+          aria-label="Search users"
+        />
+      </div>
 
       <div className="gloss-toggle admin-filters" role="group" aria-label="Filter users">
         {(['all', 'active', 'blocked'] as Filter[]).map((f) => (
-          <button key={f} className={`gloss-btn${filter === f ? ' active' : ''}`} aria-pressed={filter === f} onClick={() => { setFilter(f); setPage(0); }}>
+          <button type="button" key={f} className={`gloss-btn${filter === f ? ' active' : ''}`} aria-pressed={filter === f} onClick={() => { setFilter(f); setPage(0); }}>
             {f === 'all' ? 'All' : f === 'active' ? 'Active' : 'Blocked'}
           </button>
         ))}
@@ -143,13 +162,16 @@ export function AdminUsers({ onBack }: AdminUsersProps) {
                   </td>
                   <td className="admin-td-actions">
                     <button
+                      type="button"
                       className={`admin-btn ${u.is_blocked ? 'unblock' : 'block'}`}
                       disabled={busy === u.user_id}
                       onClick={() => { void toggleBlock(u); }}
                     >
+                      <Icon name={u.is_blocked ? 'check' : 'ban'} size={15} />
                       {u.is_blocked ? 'Unblock' : 'Block'}
                     </button>
-                    <button className="admin-btn delete" disabled={busy === u.user_id} onClick={() => { void remove(u); }}>
+                    <button type="button" className="admin-btn delete" disabled={busy === u.user_id} onClick={() => { void remove(u); }}>
+                      <Icon name="trash" size={15} />
                       Delete
                     </button>
                   </td>
@@ -160,9 +182,15 @@ export function AdminUsers({ onBack }: AdminUsersProps) {
         </div>
         {!loading && !error && shown.length > PAGE_SIZE && (
           <div className="admin-pager">
-            <button className="admin-btn" disabled={currentPage === 0} onClick={() => setPage(currentPage - 1)}>← Previous</button>
+            <button type="button" className="admin-btn" disabled={currentPage === 0} onClick={() => setPage(currentPage - 1)}>
+              <Icon name="arrowLeft" size={15} />
+              Previous
+            </button>
             <span>Page {currentPage + 1} of {pageCount}</span>
-            <button className="admin-btn" disabled={currentPage >= pageCount - 1} onClick={() => setPage(currentPage + 1)}>Next →</button>
+            <button type="button" className="admin-btn" disabled={currentPage >= pageCount - 1} onClick={() => setPage(currentPage + 1)}>
+              Next
+              <Icon name="arrowRight" size={15} />
+            </button>
           </div>
         )}
         {!loading && !error && shown.length === 0 && (

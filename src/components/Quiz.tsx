@@ -5,6 +5,7 @@ import { generateTopicQuestions } from '../data/generators';
 import { useLang } from '../i18n/LanguageContext';
 import { useTTS } from '../hooks/useTTS';
 import { useTimer } from '../hooks/useTimer';
+import { Icon } from './Icon';
 
 interface QuizProps {
   level: Level;
@@ -86,7 +87,9 @@ export function Quiz({ level, learnLang, timed, topicWords, fixedQuestions, onCo
   return (
     <div className="quiz-screen" dir="auto">
       <div className="quiz-top-bar">
-        <button className="back-btn" onClick={onBack}>{t('quiz.back')}</button>
+        <button type="button" className="back-btn" onClick={onBack} aria-label={t('quiz.back')}>
+          <Icon name="arrowLeft" size={20} />
+        </button>
         <div className="progress-bar-bg">
           <div className="progress-bar-fill" style={{ width: `${progress}%` }} />
         </div>
@@ -102,12 +105,17 @@ export function Quiz({ level, learnLang, timed, topicWords, fixedQuestions, onCo
 
       <div className="quiz-card" key={current.id}>
         {timedOut && (
-          <div className="timeout-banner">⏰ Time's up!</div>
+          <div className="timeout-banner">
+            <Icon name="timer" size={16} />
+            Time's up!
+          </div>
         )}
         <div className="question-category">{current.category}</div>
         <div className="question-row">
           <p className="question-text">{current.question}</p>
-          <button className="speak-btn-small" onClick={() => handleSpeak(current.question)} title="Listen">🔊</button>
+          <button type="button" className="speak-btn-small" onClick={() => handleSpeak(current.question)} aria-label="Listen">
+            <Icon name="volume" size={16} />
+          </button>
         </div>
 
         <div className="options-grid">
@@ -122,14 +130,24 @@ export function Quiz({ level, learnLang, timed, topicWords, fixedQuestions, onCo
             return (
               <button
                 key={opt}
+                type="button"
                 className={btnClass}
                 onClick={() => handleSelect(opt)}
                 disabled={isAnswered}
               >
                 <span className="option-text">{opt}</span>
-                <span className="option-speak" onClick={(e) => { e.stopPropagation(); handleSpeak(opt); }} title="Listen">🔊</span>
-                {isAnswered && opt === current.correctAnswer && <span className="check-mark">✓</span>}
-                {isAnswered && opt === selectedAnswer && opt !== current.correctAnswer && <span className="x-mark">✗</span>}
+                <span
+                  className="option-speak"
+                  role="button"
+                  tabIndex={0}
+                  aria-label={`Listen: ${opt}`}
+                  onClick={(e) => { e.stopPropagation(); handleSpeak(opt); }}
+                  onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.stopPropagation(); handleSpeak(opt); } }}
+                >
+                  <Icon name="volume" size={16} />
+                </span>
+                {isAnswered && opt === current.correctAnswer && <span className="check-mark"><Icon name="check" size={16} /></span>}
+                {isAnswered && opt === selectedAnswer && opt !== current.correctAnswer && <span className="x-mark"><Icon name="x" size={16} /></span>}
               </button>
             );
           })}
@@ -137,7 +155,7 @@ export function Quiz({ level, learnLang, timed, topicWords, fixedQuestions, onCo
 
         {isAnswered && (
           <div className={`explanation-box ${selectedAnswer === current.correctAnswer ? 'correct-box' : 'wrong-box'}`}>
-            <strong>{timedOut ? '⏰ Time\'s up!' : selectedAnswer === current.correctAnswer ? t('quiz.correct') : t('quiz.oops')}</strong>
+            <strong>{timedOut ? "Time's up!" : selectedAnswer === current.correctAnswer ? t('quiz.correct') : t('quiz.oops')}</strong>
             <p>{current.explanation}</p>
           </div>
         )}
@@ -145,11 +163,13 @@ export function Quiz({ level, learnLang, timed, topicWords, fixedQuestions, onCo
 
       <div className="quiz-bottom-bar">
         <button
+          type="button"
           className={`next-btn ${isAnswered ? 'active' : ''}`}
           onClick={handleNext}
           disabled={!isAnswered}
         >
           {currentIndex < quizQuestions.length - 1 ? t('quiz.next') : t('quiz.results')}
+          <Icon name="arrowRight" size={18} />
         </button>
       </div>
     </div>

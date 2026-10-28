@@ -1,4 +1,5 @@
 import type { SceneKind, SceneItem } from '../data/scenes';
+import { pictogramNode } from './Pictogram';
 
 // Cartoon artwork for the picture games. Everything is drawn on a 420 x 520 canvas,
 // matching the coordinates in data/scenes.ts.
@@ -231,11 +232,11 @@ function FamilyPicture() {
   );
 }
 
-// Emoji pictures: each item is a card with its emoji. Animals and transport have their own backgrounds.
-function EmojiPicture({ items, kind }: { items: SceneItem[]; kind: string }) {
+// Word pictures: each item is a card with its own line-art glyph.
+function WordPicture({ items, kind }: { items: SceneItem[]; kind: string }) {
   const tile = items.length > 10 ? 56 : 92;
   const half = tile / 2;
-  const fontSize = Math.round(tile * 0.7);
+  const glyph = Math.round(tile * 0.58);
   return (
     <g>
       {kind === 'animals' && (
@@ -264,9 +265,9 @@ function EmojiPicture({ items, kind }: { items: SceneItem[]; kind: string }) {
       {items.map((item) => (
         <g key={item.id}>
           <rect x={item.x - half} y={item.y - half} width={tile} height={tile} rx={tile * 0.26} fill="#ffffff" stroke="#dfe6ee" strokeWidth={2} />
-          <text x={item.x} y={item.y + 1} textAnchor="middle" dominantBaseline="central" fontSize={fontSize}>
-            {item.emoji}
-          </text>
+          <g transform={`translate(${item.x - glyph / 2} ${item.y - glyph / 2})`}>
+            {pictogramNode(item.emoji ?? '', glyph, '#334155', item.id)}
+          </g>
         </g>
       ))}
     </g>
@@ -286,7 +287,7 @@ export function SceneArt({ kind, items }: { kind: SceneKind; items: SceneItem[] 
       {kind === 'clothes-female' && <FemalePerson />}
       {kind === 'body' && <Person clothed={false} />}
       {kind === 'family' && <FamilyPicture />}
-      {!handDrawn && <EmojiPicture items={items} kind={kind} />}
+      {!handDrawn && <WordPicture items={items} kind={kind} />}
     </svg>
   );
 }

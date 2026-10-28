@@ -1,6 +1,7 @@
 import type { LearnLanguage } from '../types';
 import { learnLangs } from '../data/questions';
 import { useTx } from '../i18n/uiText';
+import { Icon } from './Icon';
 
 // Only German is open for now. Add more codes here when those languages are ready.
 const openLangs: LearnLanguage[] = ['de'];
@@ -22,7 +23,9 @@ export function LearnLangSelector({ value, onChange }: LearnLangSelectorProps) {
             className={`learn-lang-btn ${l.code === value ? 'active' : ''}`}
             onClick={() => onChange(l.code)}
           >
-            <span className="learn-lang-flag">{l.flag}</span>
+            <span className="learn-lang-flag">
+              <Icon name="globe" size={18} />
+            </span>
             <span className="learn-lang-name">{l.name}</span>
           </button>
         ))}

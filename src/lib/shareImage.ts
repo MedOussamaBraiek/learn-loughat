@@ -5,7 +5,11 @@ export interface ShareInfo {
   rows: LeaderRow[];
 }
 
-const medal = ['🥇', '🥈', '🥉'];
+const medalStyles = [
+  { ring: '#f6c453', disc: '#fde68a', star: '#b45309' },
+  { ring: '#cbd5e1', disc: '#eef2f7', star: '#64748b' },
+  { ring: '#d08a52', disc: '#f5d6bb', star: '#92400e' },
+];
 
 // Draws the top 3 as a shareable PNG card
 export function drawRankCard({ title, rows }: ShareInfo): Promise<Blob> {
@@ -23,8 +27,23 @@ export function drawRankCard({ title, rows }: ShareInfo): Promise<Blob> {
 
   ctx.fillStyle = '#ffffff';
   ctx.textAlign = 'center';
-  ctx.font = 'bold 84px system-ui, sans-serif';
-  ctx.fillText('🦉 Learn Loughat', canvas.width / 2, 130);
+  const brand = 'Learn Loughat';
+  const brandFont = 'bold 84px system-ui, sans-serif';
+  const markSize = 100;
+  const gap = 26;
+  ctx.font = brandFont;
+  const brandWidth = ctx.measureText(brand).width;
+  const brandX = (canvas.width - (markSize + gap + brandWidth)) / 2;
+  roundRect(ctx, brandX, 56, markSize, markSize, 26);
+  ctx.fill();
+  ctx.fillStyle = '#1cb0f6';
+  ctx.font = 'bold 68px system-ui, sans-serif';
+  ctx.fillText('L', brandX + markSize / 2, 56 + 76);
+  ctx.textAlign = 'left';
+  ctx.fillStyle = '#ffffff';
+  ctx.font = brandFont;
+  ctx.fillText(brand, brandX + markSize + gap, 130);
+  ctx.textAlign = 'center';
   ctx.font = '600 52px system-ui, sans-serif';
   ctx.fillText(title, canvas.width / 2, 210);
 
@@ -35,15 +54,23 @@ export function drawRankCard({ title, rows }: ShareInfo): Promise<Blob> {
     roundRect(ctx, 80, y, canvas.width - 160, 230, 36);
     ctx.fill();
 
+    const medal = medalStyles[i];
+    ctx.beginPath();
+    ctx.arc(165, y + 115, 46, 0, Math.PI * 2);
+    ctx.fillStyle = medal.disc;
+    ctx.fill();
+    ctx.lineWidth = 6;
+    ctx.strokeStyle = medal.ring;
+    ctx.stroke();
+    drawStar(ctx, 165, y + 115, 22, 9, medal.star);
+
     ctx.textAlign = 'left';
     ctx.fillStyle = '#3c3c3c';
-    ctx.font = '86px system-ui, sans-serif';
-    ctx.fillText(medal[i], 110, y + 150);
     ctx.font = 'bold 60px system-ui, sans-serif';
-    ctx.fillText(truncate(ctx, r.nickname, 520), 270, y + 105);
+    ctx.fillText(truncate(ctx, r.nickname, 520), 250, y + 105);
     ctx.font = '500 44px system-ui, sans-serif';
     ctx.fillStyle = '#777';
-    ctx.fillText(`${r.correct_total}/${r.total_questions} correct · ${r.pct}%`, 270, y + 170);
+    ctx.fillText(`${r.correct_total}/${r.total_questions} correct · ${r.pct}%`, 250, y + 170);
     ctx.textAlign = 'right';
     ctx.fillStyle = '#58cc02';
     ctx.font = 'bold 72px system-ui, sans-serif';
@@ -65,6 +92,21 @@ export function drawRankCard({ title, rows }: ShareInfo): Promise<Blob> {
   return new Promise((resolve, reject) => {
     canvas.toBlob((blob) => (blob ? resolve(blob) : reject(new Error('Could not create the image.'))), 'image/png');
   });
+}
+
+function drawStar(ctx: CanvasRenderingContext2D, cx: number, cy: number, outer: number, inner: number, color: string) {
+  ctx.beginPath();
+  for (let i = 0; i < 10; i++) {
+    const radius = i % 2 === 0 ? outer : inner;
+    const angle = (Math.PI / 5) * i - Math.PI / 2;
+    const x = cx + Math.cos(angle) * radius;
+    const y = cy + Math.sin(angle) * radius;
+    if (i === 0) ctx.moveTo(x, y);
+    else ctx.lineTo(x, y);
+  }
+  ctx.closePath();
+  ctx.fillStyle = color;
+  ctx.fill();
 }
 
 function roundRect(ctx: CanvasRenderingContext2D, x: number, y: number, w: number, h: number, r: number) {

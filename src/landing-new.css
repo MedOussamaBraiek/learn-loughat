@@ -76,7 +76,9 @@
 }
 
 .lp-hero-badge {
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
   align-self: flex-start;
   background: linear-gradient(135deg, #dbeafe 0%, #eff6ff 100%);
   color: var(--blue);
@@ -254,6 +256,10 @@
 }
 
 .lp-hero-card-badge {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
   text-align: center;
   background: #fef3c7;
   color: #92400e;
@@ -320,9 +326,15 @@
 }
 
 .lp-feature-icon {
-  font-size: 40px;
+  width: 52px;
+  height: 52px;
   margin-bottom: 16px;
-  display: inline-block;
+  border-radius: 14px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: #eff6ff;
+  color: var(--blue);
 }
 
 .lp-feature-title {

@@ -2,6 +2,7 @@ import { levels } from '../data/questions';
 import type { Level } from '../types';
 import { useLang } from '../i18n/LanguageContext';
 import { useTx } from '../i18n/uiText';
+import { Icon } from './Icon';
 
 interface CoursesPageProps {
   onSelect: (level: Level) => void;
@@ -30,7 +31,9 @@ export function CoursesPage({ onSelect, onBack }: CoursesPageProps) {
   return (
     <div className="course-screen">
       <div className="course-header">
-        <button className="back-btn" onClick={onBack}>←</button>
+        <button type="button" className="back-btn" onClick={onBack} aria-label={tx('common.back')}>
+          <Icon name="arrowLeft" size={20} />
+        </button>
         <div className="course-header-center">
           <h2 className="course-title">{tx('courses.title')}</h2>
         </div>
@@ -48,7 +51,10 @@ export function CoursesPage({ onSelect, onBack }: CoursesPageProps) {
             <span className="level-badge">{level.label}</span>
             <span className="level-name">{t(levelNameKey[level.label] as any)}</span>
             <span className="level-desc">{t(levelDescKey[level.label] as any)}</span>
-            <span className="level-arrow">Open →</span>
+            <span className="level-arrow">
+              {tx('courses.open')}
+              <Icon name="arrowRight" size={16} />
+            </span>
           </button>
         ))}
       </div>

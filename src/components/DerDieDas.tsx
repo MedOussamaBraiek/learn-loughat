@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react';
 import type { Level } from '../types';
 import { getTopics } from '../data/topics';
+import { Icon } from './Icon';
 
 interface DerDieDasProps {
   onBack: () => void;
@@ -46,22 +47,32 @@ export function DerDieDas({ onBack }: DerDieDasProps) {
   return (
     <div className="course-screen">
       <div className="course-header">
-        <button className="back-btn" onClick={onBack}>←</button>
+        <button type="button" className="back-btn" onClick={onBack} aria-label="Back">
+          <Icon name="arrowLeft" size={20} />
+        </button>
         <div className="course-header-center">
+          <span className="course-unit-icon big"><Icon name="search" size={26} /></span>
           <h2 className="course-title">der · die · das helper</h2>
         </div>
       </div>
 
       <p className="match-hint">Every German noun has one article: der, die or das. The ending of a word often tells you which one.</p>
 
-      <h3 className="memory-section-title">🔍 Look up a word</h3>
-      <input
-        className="admin-search"
-        type="search"
-        placeholder="Type a German word, e.g. Zeitung or Kind"
-        value={query}
-        onChange={(e) => setQuery(e.target.value)}
-      />
+      <h3 className="memory-section-title">
+        <Icon name="search" size={18} />
+        Look up a word
+      </h3>
+      <div className="search-field">
+        <Icon name="search" size={18} />
+        <input
+          className="admin-search"
+          type="search"
+          placeholder="Type a German word, e.g. Zeitung or Kind"
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          aria-label="Search a German word"
+        />
+      </div>
       {q && results.length === 0 && <p className="match-hint">Not in the word lists yet. Try the endings below.</p>}
       <div className="helper-results">
         {results.map((w) => {
@@ -79,7 +90,10 @@ export function DerDieDas({ onBack }: DerDieDasProps) {
         })}
       </div>
 
-      <h3 className="memory-section-title">📏 Ending rules</h3>
+      <h3 className="memory-section-title">
+        <Icon name="ruler" size={18} />
+        Ending rules
+      </h3>
       <div className="helper-rules">
         {rules.map((r) => (
           <div key={r.endings.join()} className="helper-rule" style={{ '--art': articleColor[r.article] } as React.CSSProperties}>

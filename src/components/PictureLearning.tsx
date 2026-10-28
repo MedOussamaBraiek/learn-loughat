@@ -2,6 +2,8 @@ import { useState } from 'react';
 import type { LearnLanguage } from '../types';
 import { pictureScenes, type SceneKind } from '../data/scenes';
 import { SceneBoard } from './SceneBoard';
+import { Icon } from './Icon';
+import { Pictogram } from './Pictogram';
 
 interface PictureLearningProps {
   learnLang: LearnLanguage;
@@ -20,9 +22,12 @@ export function PictureLearning({ learnLang, onBack }: PictureLearningProps) {
   return (
     <div className="course-screen">
       <div className="course-header">
-        <button className="back-btn" onClick={onBack}>←</button>
+        <button type="button" className="back-btn" onClick={onBack} aria-label="Back">
+          <Icon name="arrowLeft" size={20} />
+        </button>
         <div className="course-header-center">
-          <h2 className="course-title">🖼️ Picture Learning</h2>
+          <span className="course-unit-icon big"><Icon name="image" size={26} /></span>
+          <h2 className="course-title">Picture learning</h2>
         </div>
       </div>
       <p className="match-hint">Pick a picture. Learn the words with arrows, then play to test yourself.</p>
@@ -30,11 +35,12 @@ export function PictureLearning({ learnLang, onBack }: PictureLearningProps) {
         {pictureScenes.map((s) => (
           <button
             key={s.kind}
+            type="button"
             className="course-unit"
             style={{ '--topic-color': s.color } as React.CSSProperties}
             onClick={() => setKind(s.kind)}
           >
-            <span className="course-unit-icon">{s.icon}</span>
+            <span className="course-unit-icon"><Pictogram emoji={s.icon} size={22} /></span>
             <span className="course-unit-title">{s.title}</span>
             <span className="course-unit-meta">{s.items.length} words</span>
           </button>

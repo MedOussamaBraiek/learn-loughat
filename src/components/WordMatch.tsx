@@ -3,6 +3,8 @@ import type { TopicUnit, LearnLanguage } from '../types';
 import { useTTS } from '../hooks/useTTS';
 import { useGloss } from '../i18n/GlossContext';
 import { GlossToggle } from './GlossToggle';
+import { Icon } from './Icon';
+import { Pictogram } from './Pictogram';
 
 interface WordMatchProps {
   topic: TopicUnit;
@@ -87,9 +89,9 @@ export function WordMatch({ topic, learnLang, onBack }: WordMatchProps) {
   const waitingLeft = selLeft === null && selRight !== null;
   const waitingRight = selRight === null && selLeft !== null;
   let instruction = 'Step 1: tap a German word on the left.';
-  if (wrongPair) instruction = '❌ Not a match. Try again.';
-  else if (selLeft !== null && selRight === null) instruction = `✅ You picked ${group[selLeft].article ? group[selLeft].article + ' ' : ''}${group[selLeft].word}. Now tap its English meaning on the right →`;
-  else if (selRight !== null && selLeft === null) instruction = `✅ You picked "${meaningOf(group[selRight])}". Now tap the German word on the left ←`;
+  if (wrongPair) instruction = 'Not a match. Try again.';
+  else if (selLeft !== null && selRight === null) instruction = `You picked ${group[selLeft].article ? group[selLeft].article + ' ' : ''}${group[selLeft].word}. Now tap its meaning on the right.`;
+  else if (selRight !== null && selLeft === null) instruction = `You picked "${meaningOf(group[selRight])}". Now tap the German word on the left.`;
   const isLastRound = groupIndex === groups.length - 1;
 
   const nextRound = () => {
@@ -104,9 +106,11 @@ export function WordMatch({ topic, learnLang, onBack }: WordMatchProps) {
   return (
     <div className="course-screen">
       <div className="course-header">
-        <button className="back-btn" onClick={onBack}>←</button>
+        <button type="button" className="back-btn" onClick={onBack} aria-label="Back">
+          <Icon name="arrowLeft" size={20} />
+        </button>
         <div className="course-header-center">
-          <span className="course-unit-icon big">{topic.icon}</span>
+          <span className="course-unit-icon big"><Pictogram emoji={topic.icon} size={26} /></span>
           <h2 className="course-title">{topic.title} · Match</h2>
         </div>
       </div>
@@ -122,8 +126,14 @@ export function WordMatch({ topic, learnLang, onBack }: WordMatchProps) {
           <p className={`match-step${wrongPair ? ' bad' : ''}`}>{instruction}</p>
 
           <div className="match-headers">
-            <span>🇩🇪 Deutsch</span>
-            <span>🇬🇧 English</span>
+            <span>
+              <Icon name="flag" size={15} />
+              Deutsch
+            </span>
+            <span>
+              <Icon name="languages" size={15} />
+              {gloss === 'ar' ? 'العربية' : 'English'}
+            </span>
           </div>
 
           <div className="match-columns">
@@ -165,16 +175,20 @@ export function WordMatch({ topic, learnLang, onBack }: WordMatchProps) {
           </div>
 
           {roundDone && !isLastRound && (
-            <button className="action-btn primary match-next" onClick={nextRound}>
-              Next round →
+            <button type="button" className="action-btn primary match-next" onClick={nextRound}>
+              Next round
+              <Icon name="arrowRight" size={18} />
             </button>
           )}
 
           {roundDone && isLastRound && (
             <div className="match-finished">
-              <h3>🎉 All pairs matched!</h3>
+              <h3>
+                <Icon name="sparkles" size={22} />
+                All pairs matched!
+              </h3>
               <p>Total mistakes: {mistakes}</p>
-              <button className="action-btn secondary" onClick={onBack}>Back to topic</button>
+              <button type="button" className="action-btn secondary" onClick={onBack}>Back to topic</button>
             </div>
           )}
         </>

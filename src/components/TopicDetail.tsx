@@ -4,6 +4,8 @@ import { grammarUnits, getTopics } from '../data/topics';
 import { useTTS } from '../hooks/useTTS';
 import { useGloss } from '../i18n/GlossContext';
 import { GlossToggle } from './GlossToggle';
+import { Icon } from './Icon';
+import { Pictogram } from './Pictogram';
 
 interface TopicDetailProps {
   level: Level;
@@ -34,7 +36,7 @@ export function TopicDetail({ level, learnLang, topicId, isGrammar, onStartStudy
       return grammar.examples.map((ex) => ({
         front: ex.de,
         back: ex.en,
-        details: `${grammar.icon} ${grammar.title}`,
+        details: grammar.title,
         frontLang: learnLang,
       }));
     }
@@ -51,7 +53,9 @@ export function TopicDetail({ level, learnLang, topicId, isGrammar, onStartStudy
     return (
       <div className="course-screen">
         <div className="course-header">
-          <button className="back-btn" onClick={onBack}>←</button>
+          <button type="button" className="back-btn" onClick={onBack} aria-label="Back">
+            <Icon name="arrowLeft" size={20} />
+          </button>
           <h2 className="course-title">Not found</h2>
         </div>
         <button className="action-btn secondary" onClick={onBack}>Back</button>
@@ -62,9 +66,13 @@ export function TopicDetail({ level, learnLang, topicId, isGrammar, onStartStudy
   return (
     <div className="course-screen">
       <div className="course-header">
-        <button className="back-btn" onClick={onBack}>←</button>
+        <button type="button" className="back-btn" onClick={onBack} aria-label="Back">
+          <Icon name="arrowLeft" size={20} />
+        </button>
         <div className="course-header-center">
-          <span className="course-unit-icon big">{isGrammar ? grammar?.icon : topic?.icon}</span>
+          <span className="course-unit-icon big">
+            {isGrammar ? <Pictogram emoji={grammar?.icon ?? ''} size={26} /> : <Pictogram emoji={topic?.icon ?? ''} size={26} />}
+          </span>
           <h2 className="course-title">{isGrammar ? grammar?.title : topic?.title}</h2>
         </div>
       </div>
@@ -72,15 +80,18 @@ export function TopicDetail({ level, learnLang, topicId, isGrammar, onStartStudy
       <GlossToggle />
 
       <div className="course-actions">
-        <button className="course-action-btn flashcards-btn" onClick={() => onStartStudy(cards, isGrammar ? grammar?.title || '' : topic?.title || '')} disabled={cards.length === 0}>
-          📚 Flashcards
+        <button type="button" className="course-action-btn flashcards-btn" onClick={() => onStartStudy(cards, isGrammar ? grammar?.title || '' : topic?.title || '')} disabled={cards.length === 0}>
+          <Icon name="bookOpen" size={18} />
+          Flashcards
         </button>
-        <button className="course-action-btn quiz-btn" onClick={onStartQuiz}>
-          ▶ Quiz
+        <button type="button" className="course-action-btn quiz-btn" onClick={onStartQuiz}>
+          <Icon name="play" size={17} />
+          Quiz
         </button>
         {topic && (
-          <button className="course-action-btn match-btn" onClick={onStartMatch} disabled={topic.words.length === 0}>
-            🎮 Match
+          <button type="button" className="course-action-btn match-btn" onClick={onStartMatch} disabled={topic.words.length === 0}>
+            <Icon name="gamepad" size={18} />
+            Match
           </button>
         )}
       </div>
@@ -90,14 +101,16 @@ export function TopicDetail({ level, learnLang, topicId, isGrammar, onStartStudy
           <div className="grammar-intro">{grammar.intro}</div>
           <ul className="grammar-points">
             {grammar.points.map((p, i) => (
-              <li key={i} className="grammar-point">▸ {p}</li>
+              <li key={i} className="grammar-point">{p}</li>
             ))}
           </ul>
           <h4 className="grammar-examples-title">Examples</h4>
           <div className="grammar-examples">
             {grammar.examples.map((ex, i) => (
               <div key={i} className="grammar-example">
-                <button className="speak-btn-small" onClick={() => speak(ex.de, learnLang)}>🔊</button>
+                <button type="button" className="speak-btn-small" onClick={() => speak(ex.de, learnLang)} aria-label={`Listen: ${ex.de}`}>
+                  <Icon name="volume" size={16} />
+                </button>
                 <div>
                   <p className="grammar-example-de">{ex.de}</p>
                   <p className="grammar-example-en">{ex.en}</p>
@@ -114,7 +127,9 @@ export function TopicDetail({ level, learnLang, topicId, isGrammar, onStartStudy
               <span className="topic-word-text">{w.word}</span>
               <span className="topic-word-plural">{w.plural}</span>
               <span className="topic-word-translation" dir={gloss === 'ar' && w.ar ? 'rtl' : undefined}>{gloss === 'ar' && w.ar ? w.ar : w.translation}</span>
-              <button className="topic-word-speak" onClick={() => speak(`${w.article} ${w.word}`.trim(), learnLang)}>🔊</button>
+              <button type="button" className="topic-word-speak" onClick={() => speak(`${w.article} ${w.word}`.trim(), learnLang)} aria-label={`Listen: ${w.word}`}>
+                <Icon name="volume" size={17} />
+              </button>
             </div>
           ))}
         </div>

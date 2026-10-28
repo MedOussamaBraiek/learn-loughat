@@ -6,6 +6,7 @@ import { supabase } from '../lib/supabase';
 import { Quiz } from './Quiz';
 import { Leaderboard } from './Leaderboard';
 import { shareRankCard } from '../lib/shareImage';
+import { Icon } from './Icon';
 
 interface DailyChallengeProps {
   learnLang: LearnLanguage;
@@ -113,9 +114,11 @@ export function DailyChallenge({ learnLang, level, onBack }: DailyChallengeProps
   return (
     <div className="course-screen">
       <div className="course-header">
-        <button className="back-btn" onClick={onBack}>←</button>
+        <button type="button" className="back-btn" onClick={onBack} aria-label="Back">
+          <Icon name="arrowLeft" size={20} />
+        </button>
         <div className="course-header-center">
-          <span className="course-unit-icon big">🔥</span>
+          <span className="course-unit-icon big"><Icon name="flame" size={26} /></span>
           <h2 className="course-title">Daily challenge · {level}</h2>
         </div>
       </div>
@@ -133,7 +136,10 @@ export function DailyChallenge({ learnLang, level, onBack }: DailyChallengeProps
       {phase === 'signin' && (
         <div className="daily-card">
           <p>Sign in to play today’s challenge and appear on the rankings.</p>
-          <button className="action-btn primary" onClick={() => { void signInWithGoogle(); }}>Sign in with Google</button>
+          <button type="button" className="action-btn primary" onClick={() => { void signInWithGoogle(); }}>
+            <Icon name="login" size={18} />
+            Sign in with Google
+          </button>
         </div>
       )}
 
@@ -141,7 +147,10 @@ export function DailyChallenge({ learnLang, level, onBack }: DailyChallengeProps
         <div className="daily-card">
           <p><strong>{questions.length} {level} questions</strong>, the same set for everyone at this level today.</p>
           <p className="match-hint">20 seconds per question. One attempt only: once you start, you have to finish it.</p>
-          <button className="action-btn primary" onClick={start}>Start today’s challenge</button>
+          <button type="button" className="action-btn primary" onClick={start}>
+            <Icon name="play" size={18} />
+            Start today’s challenge
+          </button>
         </div>
       )}
 
@@ -156,10 +165,16 @@ export function DailyChallenge({ learnLang, level, onBack }: DailyChallengeProps
           <div className="daily-card daily-result">
             <p className="daily-score">{result.correct} / {result.total}</p>
             <p className="match-hint">in {result.seconds} seconds</p>
-            {result.saved && <p className="scene-message ok">✅ Saved to the rankings</p>}
+            {result.saved && (
+              <p className="scene-message ok">
+                <Icon name="check" size={16} />
+                Saved to the rankings
+              </p>
+            )}
             {!result.saved && result.error && <p className="scene-message bad">{result.error}</p>}
             {result.total > 0 && (
               <button
+                type="button"
                 className="action-btn primary daily-share"
                 onClick={() => {
                   shareRankCard({
@@ -176,7 +191,8 @@ export function DailyChallenge({ learnLang, level, onBack }: DailyChallengeProps
                     .catch((e: Error) => setShareNote(e.message));
                 }}
               >
-                📸 Share my result
+                <Icon name="share" size={18} />
+                Share my result
               </button>
             )}
             {shareNote && <p className="match-hint">{shareNote}</p>}
@@ -187,7 +203,10 @@ export function DailyChallenge({ learnLang, level, onBack }: DailyChallengeProps
           <h3 className="step-label">Rankings</h3>
           <Leaderboard today={today} lang={learnLang} initialLevel={level} />
           {signedIn && (
-            <button className="action-btn secondary daily-signout" onClick={() => { void signOut().then(onBack); }}>Sign out</button>
+            <button type="button" className="action-btn secondary daily-signout" onClick={() => { void signOut().then(onBack); }}>
+              <Icon name="logout" size={17} />
+              Sign out
+            </button>
           )}
         </>
       )}

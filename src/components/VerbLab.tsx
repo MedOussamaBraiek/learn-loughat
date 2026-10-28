@@ -5,6 +5,8 @@ import { importantVerbs, verbAdvice, type VerbTense, type VerbGameKind } from '.
 import { useTx, type UiKey } from '../i18n/uiText';
 import { useTTS } from '../hooks/useTTS';
 import { VerbGame } from './VerbGame';
+import { Icon, type IconName } from './Icon';
+import { Pictogram } from './Pictogram';
 
 interface VerbLabProps {
   onBack: () => void;
@@ -12,11 +14,11 @@ interface VerbLabProps {
 
 type VerbTab = 'overview' | VerbTense;
 
-const tabs: { key: VerbTab; icon: string; labelKey: UiKey }[] = [
-  { key: 'overview', icon: '⭐', labelKey: 'verbs.tabOverview' },
-  { key: 'perfekt', icon: '🕰️', labelKey: 'verbs.tabPerfekt' },
-  { key: 'praeteritum', icon: '📜', labelKey: 'verbs.tabPraeteritum' },
-  { key: 'imperativ', icon: '❗', labelKey: 'verbs.tabImperativ' },
+const tabs: { key: VerbTab; icon: IconName; labelKey: UiKey }[] = [
+  { key: 'overview', icon: 'star', labelKey: 'verbs.tabOverview' },
+  { key: 'perfekt', icon: 'clock', labelKey: 'verbs.tabPerfekt' },
+  { key: 'praeteritum', icon: 'scroll', labelKey: 'verbs.tabPraeteritum' },
+  { key: 'imperativ', icon: 'alert', labelKey: 'verbs.tabImperativ' },
 ];
 
 const heads: Record<VerbTab, UiKey[]> = {
@@ -26,13 +28,13 @@ const heads: Record<VerbTab, UiKey[]> = {
   imperativ: ['verbs.colVerb', 'verbs.colDu', 'verbs.colIhr', 'verbs.colSie'],
 };
 
-const gamesByTab: Record<VerbTense, { kind: VerbGameKind; labelKey: UiKey; icon: string }[]> = {
+const gamesByTab: Record<VerbTense, { kind: VerbGameKind; labelKey: UiKey; icon: IconName }[]> = {
   perfekt: [
-    { kind: 'perfekt', labelKey: 'verbs.gamePartizip', icon: '🧩' },
-    { kind: 'auxiliary', labelKey: 'verbs.gameAux', icon: '⚖️' },
+    { kind: 'perfekt', labelKey: 'verbs.gamePartizip', icon: 'sparkles' },
+    { kind: 'auxiliary', labelKey: 'verbs.gameAux', icon: 'chart' },
   ],
-  praeteritum: [{ kind: 'praeteritum', labelKey: 'verbs.gamePraeteritum', icon: '📜' }],
-  imperativ: [{ kind: 'imperative', labelKey: 'verbs.gameImperative', icon: '❗' }],
+  praeteritum: [{ kind: 'praeteritum', labelKey: 'verbs.gamePraeteritum', icon: 'scroll' }],
+  imperativ: [{ kind: 'imperative', labelKey: 'verbs.gameImperative', icon: 'alert' }],
 };
 
 export function VerbLab({ onBack }: VerbLabProps) {
@@ -48,7 +50,9 @@ export function VerbLab({ onBack }: VerbLabProps) {
 
   const infCell = (v: PastVerb) => (
     <span key="inf" className="verb-cell verb-inf">
-      <button className="speak-btn-small" onClick={() => speak(v.infinitive, 'de')} title={tx('verbs.listen')}>🔊</button>
+      <button type="button" className="speak-btn-small" onClick={() => speak(v.infinitive, 'de')} aria-label={tx('verbs.listen')}>
+        <Icon name="volume" size={15} />
+      </button>
       <span className="verb-inf-main">
         <strong>{v.infinitive}</strong>
         <em className="verb-trans">{v.translation}</em>
@@ -58,7 +62,9 @@ export function VerbLab({ onBack }: VerbLabProps) {
 
   const exampleCell = (v: PastVerb) => (
     <span key="ex" className="verb-cell verb-example">
-      <button className="speak-btn-small" onClick={() => speak(v.example.de, 'de')} title={tx('verbs.listen')}>🔊</button>
+      <button type="button" className="speak-btn-small" onClick={() => speak(v.example.de, 'de')} aria-label={tx('verbs.listen')}>
+        <Icon name="volume" size={15} />
+      </button>
       <span className="verb-example-main">
         {v.example.de}
         <em className="verb-example-en">{v.example.en}</em>
@@ -119,9 +125,11 @@ export function VerbLab({ onBack }: VerbLabProps) {
   return (
     <div className="course-screen verb-lab">
       <div className="course-header">
-        <button className="back-btn" onClick={onBack}>←</button>
+        <button type="button" className="back-btn" onClick={onBack} aria-label={tx('common.back')}>
+          <Icon name="arrowLeft" size={20} />
+        </button>
         <div className="course-header-center">
-          <span className="course-unit-icon big">⏰</span>
+          <span className="course-unit-icon big"><Icon name="clock" size={26} /></span>
           <h2 className="course-title">{tx('verbs.title')}</h2>
         </div>
       </div>
@@ -132,10 +140,11 @@ export function VerbLab({ onBack }: VerbLabProps) {
         {tabs.map((t) => (
           <button
             key={t.key}
+            type="button"
             className={`tense-tab ${tab === t.key ? 'active' : ''}`}
             onClick={() => setTab(t.key)}
           >
-            <span className="tense-tab-icon">{t.icon}</span>
+            <span className="tense-tab-icon"><Icon name={t.icon} size={17} /></span>
             {tx(t.labelKey)}
           </button>
         ))}
@@ -144,7 +153,10 @@ export function VerbLab({ onBack }: VerbLabProps) {
       {tab === 'overview' ? (
         <>
           <p className="match-hint">{tx('verbs.overviewHint')}</p>
-          <h3 className="memory-section-title">⭐ {tx('verbs.importantVerbs')}</h3>
+          <h3 className="memory-section-title">
+            <Icon name="star" size={18} />
+            {tx('verbs.importantVerbs')}
+          </h3>
           {table(importantVerbs)}
         </>
       ) : (
@@ -152,7 +164,7 @@ export function VerbLab({ onBack }: VerbLabProps) {
           <div className="advice-cards">
             {verbAdvice[tab].map((a, i) => (
               <div key={i} className="advice-card">
-                <span className="advice-icon">{a.icon}</span>
+                <span className="advice-icon"><Pictogram emoji={a.icon} size={20} /></span>
                 <div className="advice-body">
                   <strong>{a.title}</strong>
                   <p>{a.text}</p>
@@ -161,24 +173,30 @@ export function VerbLab({ onBack }: VerbLabProps) {
             ))}
           </div>
 
-          <h3 className="memory-section-title">🎮 {tx('verbs.practise')}</h3>
+          <h3 className="memory-section-title">
+            <Icon name="gamepad" size={18} />
+            {tx('verbs.practise')}
+          </h3>
           <p className="match-hint">{tx('verbs.practiseHint')}</p>
           <div className="game-launch-grid">
             {gamesByTab[tab].map((g) => (
-              <button key={g.kind} className="game-launch-card" onClick={() => setGame({ kind: g.kind, title: tx(g.labelKey) })}>
-                <span className="game-launch-icon">{g.icon}</span>
+              <button type="button" key={g.kind} className="game-launch-card" onClick={() => setGame({ kind: g.kind, title: tx(g.labelKey) })}>
+                <span className="game-launch-icon"><Icon name={g.icon} size={22} /></span>
                 <span className="game-launch-label">{tx(g.labelKey)}</span>
-                <span className="game-launch-go">▶</span>
+                <span className="game-launch-go"><Icon name="play" size={15} /></span>
               </button>
             ))}
           </div>
 
-          <h3 className="memory-section-title">⭐ {tx('verbs.importantVerbs')}</h3>
+          <h3 className="memory-section-title">
+            <Icon name="star" size={18} />
+            {tx('verbs.importantVerbs')}
+          </h3>
           {tab === 'perfekt' ? (
             <>
               <div className="aux-filter">
-                <button className={`aux-filter-btn haben ${aux === 'haben' ? 'active' : ''}`} onClick={() => setAux('haben')}>{tx('verbs.withHaben')}</button>
-                <button className={`aux-filter-btn sein ${aux === 'sein' ? 'active' : ''}`} onClick={() => setAux('sein')}>{tx('verbs.withSein')}</button>
+                <button type="button" className={`aux-filter-btn haben ${aux === 'haben' ? 'active' : ''}`} onClick={() => setAux('haben')}>{tx('verbs.withHaben')}</button>
+                <button type="button" className={`aux-filter-btn sein ${aux === 'sein' ? 'active' : ''}`} onClick={() => setAux('sein')}>{tx('verbs.withSein')}</button>
               </div>
               {table(importantVerbs.filter((v) => v.auxiliary === aux))}
             </>

@@ -2,6 +2,7 @@ import { useState, useMemo } from 'react';
 import type { LearnLanguage, Level, Flashcard } from '../types';
 import { vocab, shuffle, learnLangs } from '../data/vocabulary';
 import { useTTS } from '../hooks/useTTS';
+import { Icon } from './Icon';
 
 interface FlashcardStudyProps {
   learnLang: LearnLanguage;
@@ -86,13 +87,16 @@ export function FlashcardStudy({ learnLang, level, cards: customCards, title, on
     return (
       <div className="study-screen">
         <div className="study-done-card">
-          <div className="study-done-emoji">🎉</div>
+          <div className="state-icon success">
+            <Icon name="sparkles" size={30} />
+          </div>
           <h2>Review complete!</h2>
           <p>You reviewed {cards.length} words and phrases.</p>
-          <button className="action-btn primary" onClick={onStartQuiz}>
-            Start Quiz →
+          <button type="button" className="action-btn primary" onClick={onStartQuiz}>
+            Start Quiz
+            <Icon name="arrowRight" size={18} />
           </button>
-          <button className="action-btn secondary" onClick={onBack} style={{ marginTop: 12 }}>
+          <button type="button" className="action-btn secondary" onClick={onBack} style={{ marginTop: 12 }}>
             Back
           </button>
         </div>
@@ -103,7 +107,9 @@ export function FlashcardStudy({ learnLang, level, cards: customCards, title, on
   return (
     <div className="study-screen">
       <div className="study-header">
-        <button className="back-btn" onClick={onBack}>←</button>
+        <button type="button" className="back-btn" onClick={onBack} aria-label="Back">
+          <Icon name="arrowLeft" size={20} />
+        </button>
         <span className="study-progress">{current + 1} / {cards.length}</span>
         <div className="progress-bar-bg" style={{ flex: 1, marginLeft: 12 }}>
           <div className="progress-bar-fill" style={{ width: `${((current + 1) / cards.length) * 100}%` }} />
@@ -111,7 +117,8 @@ export function FlashcardStudy({ learnLang, level, cards: customCards, title, on
       </div>
 
       <div className="study-lang-badge">
-        {title ? `${title} · ${level}` : `${langInfo?.flag} ${langInfo?.name} · ${level}`}
+        <Icon name="globe" size={16} />
+        {title ? `${title} · ${level}` : `${langInfo?.name} · ${level}`}
       </div>
 
       <div className="flashcard-container" onClick={() => setFlipped(!flipped)}>
@@ -129,9 +136,15 @@ export function FlashcardStudy({ learnLang, level, cards: customCards, title, on
       </div>
 
       <div className="study-actions">
-        <button className="round-btn" onClick={handlePrev} disabled={current === 0}>←</button>
-        <button className="round-btn speak-btn" onClick={() => card && handleSpeak(card.front)}>🔊</button>
-        <button className="round-btn" onClick={handleNext}>{current < cards.length - 1 ? '→' : '✓'}</button>
+        <button type="button" className="round-btn" onClick={handlePrev} disabled={current === 0} aria-label="Previous card">
+          <Icon name="arrowLeft" size={22} />
+        </button>
+        <button type="button" className="round-btn speak-btn" onClick={() => card && handleSpeak(card.front)} aria-label="Listen">
+          <Icon name="volume" size={22} />
+        </button>
+        <button type="button" className="round-btn" onClick={handleNext} aria-label={current < cards.length - 1 ? 'Next card' : 'Finish'}>
+          <Icon name={current < cards.length - 1 ? 'arrowRight' : 'check'} size={22} />
+        </button>
       </div>
     </div>
   );

@@ -2,6 +2,7 @@ import { useMemo, useState, useEffect } from 'react';
 import type { Question, Answer, Level, LevelInfo } from '../types';
 import { levels, getImprovementTips, getAiAnalysis } from '../data/questions';
 import { useLang } from '../i18n/LanguageContext';
+import { Icon, type IconName } from './Icon';
 
 interface ResultsProps {
   questions: Question[];
@@ -15,21 +16,23 @@ function StarRating({ score, total }: { score: number; total: number }) {
   const pct = score / total;
   const stars = pct >= 0.9 ? 3 : pct >= 0.7 ? 2 : pct >= 0.4 ? 1 : 0;
   return (
-    <div className="stars-row">
+    <div className="stars-row" aria-label={`${stars} of 3 stars`}>
       {[1, 2, 3].map((s) => (
-        <span key={s} className={`star ${s <= stars ? 'filled' : ''}`}>★</span>
+        <span key={s} className={`star ${s <= stars ? 'filled' : ''}`}>
+          <Icon name="star" size={26} />
+        </span>
       ))}
     </div>
   );
 }
 
-function useResultTexts(score: number, total: number) {
+function useResultTexts(score: number, total: number): { title: string; subtitle: string; icon: IconName; tone: string } {
   const { t } = useLang();
   const pct = score / total;
-  if (pct >= 0.9) return { title: t('results.title.ausgezeichnet'), subtitle: t('results.subtitle.ausgezeichnet'), emoji: t('results.emoji.ausgezeichnet') };
-  if (pct >= 0.7) return { title: t('results.title.gutgemacht'), subtitle: t('results.subtitle.gutgemacht'), emoji: t('results.emoji.gutgemacht') };
-  if (pct >= 0.4) return { title: t('results.title.nichtschlecht'), subtitle: t('results.subtitle.nichtschlecht'), emoji: t('results.emoji.nichtschlecht') };
-  return { title: t('results.title.weiteruben'), subtitle: t('results.subtitle.weiteruben'), emoji: t('results.emoji.weiteruben') };
+  if (pct >= 0.9) return { title: t('results.title.ausgezeichnet'), subtitle: t('results.subtitle.ausgezeichnet'), icon: 'trophy', tone: 'gold' };
+  if (pct >= 0.7) return { title: t('results.title.gutgemacht'), subtitle: t('results.subtitle.gutgemacht'), icon: 'medal', tone: 'silver' };
+  if (pct >= 0.4) return { title: t('results.title.nichtschlecht'), subtitle: t('results.subtitle.nichtschlecht'), icon: 'target', tone: 'blue' };
+  return { title: t('results.title.weiteruben'), subtitle: t('results.subtitle.weiteruben'), icon: 'bookOpen', tone: 'violet' };
 }
 
 export function Results({ questions, answers, level, onRestart, onBackToLevels }: ResultsProps) {
@@ -83,7 +86,9 @@ export function Results({ questions, answers, level, onRestart, onBackToLevels }
           {level}
         </div>
 
-        <div className="result-emoji">{result.emoji}</div>
+        <div className={`result-emoji tone-${result.tone}`}>
+          <Icon name={result.icon} size={40} />
+        </div>
         <h2 className="result-title">{result.title}</h2>
         <StarRating score={score} total={questions.length} />
 
@@ -113,14 +118,18 @@ export function Results({ questions, answers, level, onRestart, onBackToLevels }
         </div>
 
         {!showAiAnalysis && (
-          <button className="show-corrections-btn ai-btn" onClick={() => setShowAiAnalysis(true)}>
-            🤖 AI Analysis
+          <button type="button" className="show-corrections-btn ai-btn" onClick={() => setShowAiAnalysis(true)}>
+            <Icon name="sparkles" size={17} />
+            AI Analysis
           </button>
         )}
 
         {showAiAnalysis && (
           <div className="ai-analysis-section">
-            <h3>🤖 AI Analysis</h3>
+            <h3>
+              <Icon name="sparkles" size={18} />
+              AI Analysis
+            </h3>
             <div className="ai-analysis-box">
               <p>{aiAnalysis}</p>
             </div>
@@ -128,7 +137,7 @@ export function Results({ questions, answers, level, onRestart, onBackToLevels }
         )}
 
         {!showCorrections ? (
-          <button className="show-corrections-btn" onClick={() => setShowCorrections(true)}>
+          <button type="button" className="show-corrections-btn" onClick={() => setShowCorrections(true)}>
             {t('results.review')}
           </button>
         ) : (
@@ -150,7 +159,10 @@ export function Results({ questions, answers, level, onRestart, onBackToLevels }
         )}
 
         <div className="improvement-section">
-          <h3>{t('results.improve')}</h3>
+          <h3>
+            <Icon name="lightbulb" size={18} />
+            {t('results.improve')}
+          </h3>
           <ul className="tips-list">
             {tips.map((tip, i) => (
               <li key={i}>{tip}</li>
@@ -159,10 +171,10 @@ export function Results({ questions, answers, level, onRestart, onBackToLevels }
         </div>
 
         <div className="results-actions">
-          <button className="action-btn primary" onClick={onRestart}>
+          <button type="button" className="action-btn primary" onClick={onRestart}>
             {t('results.try_again')}
           </button>
-          <button className="action-btn secondary" onClick={onBackToLevels}>
+          <button type="button" className="action-btn secondary" onClick={onBackToLevels}>
             {t('results.choose_level')}
           </button>
         </div>

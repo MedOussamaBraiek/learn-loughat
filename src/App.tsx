@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import type { Level, Question, Answer, LearnLanguage, Flashcard, TopicUnit } from './types';
 import { LanguageProvider, useLang } from './i18n/LanguageContext';
 import { GlossProvider } from './i18n/GlossContext';
@@ -10,7 +10,9 @@ import { AdminUsers } from './components/AdminUsers';
 import { isAdminEmail } from './lib/admin';
 import { useAuthUser } from './lib/useAuthUser';
 import { supabase } from './lib/supabase';
+import { LANDING_PATH, PLATFORM_PATH, navigate, usePathname } from './lib/router';
 import { LevelSelect } from './components/LevelSelect';
+import { Navbar } from './components/Navbar';
 import { CoursesPage } from './components/CoursesPage';
 import { DerDieDas } from './components/DerDieDas';
 import { Hub, type HubAction } from './components/Hub';
@@ -27,15 +29,16 @@ import { PictureLearning } from './components/PictureLearning';
 import { Curriculum } from './components/Curriculum';
 import { getTopics } from './data/topics';
 import './App.css';
+import './design-system.css';
 
 // levels -> hub -> (learn | pictures | games | quiz | test | syllabus | flashcards)
 type Screen = 'levels' | 'courses' | 'memory' | 'helper' | 'hub' | 'daily' | 'rankings' | 'admin' | 'topics' | 'topic' | 'dialog' | 'games' | 'match' | 'pictures' | 'curriculum' | 'study' | 'quiz' | 'results' | 'verbs';
 
 const rtlLangs = new Set(['ar']);
 
-function AppContent({ isAdmin }: { isAdmin: boolean }) {
+function AppContent({ isAdmin, initialScreen = 'levels', onHome }: { isAdmin: boolean; initialScreen?: Screen; onHome: () => void }) {
   const { lang } = useLang();
-  const [screen, setScreen] = useState<Screen>('levels');
+  const [screen, setScreen] = useState<Screen>(initialScreen);
   const [prevScreen, setPrevScreen] = useState<Screen>('levels');
   const [level, setLevel] = useState<Level>('A1');
   const [learnLang, setLearnLang] = useState<LearnLanguage>('de');
@@ -48,6 +51,10 @@ function AppContent({ isAdmin }: { isAdmin: boolean }) {
   const [studyCards, setStudyCards] = useState<Flashcard[]>([]);
   const [studyTitle, setStudyTitle] = useState('');
   const [quizUsesTopic, setQuizUsesTopic] = useState(false);
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [screen]);
 
   const goTo = (s: Screen) => {
     setPrevScreen(screen);
@@ -153,19 +160,13 @@ function AppContent({ isAdmin }: { isAdmin: boolean }) {
 
   return (
     <div className="app-root">
-      <nav className="app-navbar">
-        <div className="app-navbar-container">
-          <div className="app-navbar-logo" onClick={() => setScreen('levels')} style={{ cursor: 'pointer' }}>
-            <span className="app-navbar-logo-text">Learn Loughat</span>
-          </div>
-          <div className="app-navbar-actions">
-            {supabase ? (
-              <button className="app-navbar-btn" onClick={(e) => { e.preventDefault(); e.stopPropagation(); void import('./lib/rankings').then(m => { m.signOut(); window.location.reload(); }); }}>Disconnect</button>
-            ) : null}
-          </div>
-        </div>
-      </nav>
-      <div className="app-container" style={{ paddingTop: '80px' }} dir={rtlLangs.has(lang) ? 'rtl' : 'ltr'}>
+      <Navbar
+        onHome={onHome}
+        signedIn={!!supabase}
+        isAdmin={isAdmin}
+        onAdmin={() => goTo('admin')}
+      />
+      <div className="app-container" dir={rtlLangs.has(lang) ? 'rtl' : 'ltr'}>
       {screen === 'levels' && (
         <LevelSelect
           learnLang={learnLang}
@@ -173,8 +174,6 @@ function AppContent({ isAdmin }: { isAdmin: boolean }) {
           onCourses={() => goTo('courses')}
           onMemory={() => goTo('memory')}
           onRankings={() => goTo('rankings')}
-          onAdmin={() => goTo('admin')}
-          isAdmin={isAdmin}
         />
       )}
       {screen === 'courses' && (
@@ -301,32 +300,75 @@ function AppContent({ isAdmin }: { isAdmin: boolean }) {
   );
 }
 
-// Landing page is always the entry point with navbar showing auth state
+// The landing page lives at /, the learning app at /platform.
 function AppGate() {
   const auth = useAuthUser();
-  const [showApp, setShowApp] = useState(false);
+  const path = usePathname();
+  const [entryScreen, setEntryScreen] = useState<Screen>('levels');
+  const isAdmin = isAdminEmail(auth.user?.email);
+  const onPlatform = path === PLATFORM_PATH || path.startsWith(`${PLATFORM_PATH}/`);
+  const signedInBefore = useRef(false);
+
+  useEffect(() => {
+    if (path !== LANDING_PATH && !onPlatform) {
+      navigate(LANDING_PATH, { replace: true });
+    }
+  }, [path, onPlatform]);
+
+  useEffect(() => {
+    if (!auth.ready) return;
+
+    if (auth.user) {
+      // A fresh sign-in (including the OAuth return) enters the platform once.
+      if (!signedInBefore.current) {
+        signedInBefore.current = true;
+        if (!onPlatform) navigate(PLATFORM_PATH, { replace: true });
+      }
+      return;
+    }
+
+    signedInBefore.current = false;
+    if (onPlatform && supabase) navigate(LANDING_PATH, { replace: true });
+  }, [auth.ready, auth.user, onPlatform]);
+
+  const enterApp = (screen: Screen = 'levels') => {
+    setEntryScreen(screen);
+    navigate(PLATFORM_PATH);
+  };
 
   if (!auth.ready) {
-    return <SignIn showApp={false} onEnterApp={() => setShowApp(true)} />;
+    return <SignIn isAdmin={isAdmin} />;
   }
 
-  if (auth.user && auth.blocked) {
-    return <div className="app-container"><Blocked /></div>;
+  if (onPlatform && auth.user && auth.blocked) {
+    return (
+      <div className="app-root">
+        <Navbar onHome={() => navigate(LANDING_PATH)} signedIn isAdmin={isAdmin} />
+        <div className="app-container">
+          <Blocked />
+        </div>
+      </div>
+    );
   }
 
-  if (showApp) {
-    if (auth.user) {
-      return <AppContent isAdmin={isAdminEmail(auth.user?.email)} />;
-    }
-    if (!supabase) {
-      return <AppContent isAdmin={false} />;
-    }
-    // If supabase configured but not logged in, stay on landing
-    setShowApp(false);
-    return <SignIn showApp={!!auth.user} onEnterApp={() => setShowApp(true)} />;
+  if (onPlatform && (auth.user || !supabase)) {
+    return (
+      <AppContent
+        isAdmin={isAdmin}
+        initialScreen={entryScreen}
+        onHome={() => navigate(LANDING_PATH)}
+      />
+    );
   }
 
-  return <SignIn showApp={!!auth.user} onEnterApp={() => setShowApp(true)} />;
+  return (
+    <SignIn
+      showApp={!!auth.user}
+      onEnterApp={() => enterApp()}
+      isAdmin={isAdmin}
+      onAdmin={() => enterApp('admin')}
+    />
+  );
 }
 
 export default function App() {

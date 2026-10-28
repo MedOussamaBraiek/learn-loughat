@@ -2,6 +2,7 @@ import { useState } from 'react';
 import type { Question } from '../types';
 import { useTx } from '../i18n/uiText';
 import { useTTS } from '../hooks/useTTS';
+import { Icon, type IconName } from './Icon';
 
 interface McqGameProps {
   title: string;
@@ -63,7 +64,9 @@ export function McqGame({ title, questions: initialQuestions, onBack, onReplay }
   if (questions.length === 0) {
     return (
       <div className="game-screen">
-        <button className="back-btn" onClick={onBack}>←</button>
+        <button type="button" className="back-btn" onClick={onBack} aria-label={tx('common.back')}>
+          <Icon name="arrowLeft" size={20} />
+        </button>
         <p className="match-hint">{tx('verbs.noQuestions')}</p>
       </div>
     );
@@ -71,18 +74,23 @@ export function McqGame({ title, questions: initialQuestions, onBack, onReplay }
 
   if (done) {
     const pct = Math.round((score / questions.length) * 100);
-    const emoji = pct >= 90 ? '🏆' : pct >= 70 ? '🎉' : pct >= 50 ? '👍' : '💪';
+    const resultIcon: IconName = pct >= 90 ? 'trophy' : pct >= 70 ? 'medal' : pct >= 50 ? 'target' : 'bookOpen';
     const message = pct >= 90 ? tx('verbs.resultGreat') : pct >= 70 ? tx('verbs.resultGood') : pct >= 50 ? tx('verbs.resultOk') : tx('verbs.resultKeep');
     return (
       <div className="game-screen">
         <div className="game-result">
-          <div className="game-result-emoji">{emoji}</div>
+          <div className="state-icon success">
+            <Icon name={resultIcon} size={34} />
+          </div>
           <h2 className="game-result-score">{score} / {questions.length}</h2>
           <p className="game-result-msg">{message}</p>
-          <p className="game-result-streak">🔥 {tx('verbs.bestStreak')}: {bestStreak}</p>
+          <p className="game-result-streak">
+            <Icon name="flame" size={17} />
+            {tx('verbs.bestStreak')}: {bestStreak}
+          </p>
           <div className="game-result-actions">
-            <button className="action-btn" onClick={playAgain}>{tx('verbs.playAgain')}</button>
-            <button className="action-btn secondary" onClick={onBack}>{tx('common.back')}</button>
+            <button type="button" className="action-btn" onClick={playAgain}>{tx('verbs.playAgain')}</button>
+            <button type="button" className="action-btn secondary" onClick={onBack}>{tx('common.back')}</button>
           </div>
         </div>
       </div>
@@ -92,9 +100,17 @@ export function McqGame({ title, questions: initialQuestions, onBack, onReplay }
   return (
     <div className="game-screen" dir="auto">
       <div className="quiz-top-bar">
-        <button className="back-btn" onClick={onBack}>←</button>
-        <div className="game-pill game-pill-score">⭐ {score}</div>
-        <div className="game-pill game-pill-streak">🔥 {streak}</div>
+        <button type="button" className="back-btn" onClick={onBack} aria-label={tx('common.back')}>
+          <Icon name="arrowLeft" size={20} />
+        </button>
+        <div className="game-pill game-pill-score">
+          <Icon name="star" size={15} />
+          {score}
+        </div>
+        <div className="game-pill game-pill-streak">
+          <Icon name="flame" size={15} />
+          {streak}
+        </div>
         <span className="question-counter">{index + 1}/{questions.length}</span>
       </div>
 
@@ -104,7 +120,9 @@ export function McqGame({ title, questions: initialQuestions, onBack, onReplay }
         <div className="question-category">{current.category}</div>
         <div className="question-row">
           <p className="question-text">{current.question}</p>
-          <button className="speak-btn-small" onClick={() => speak(current.question, 'de')} title={tx('verbs.listen')}>🔊</button>
+          <button type="button" className="speak-btn-small" onClick={() => speak(current.question, 'de')} aria-label={tx('verbs.listen')}>
+            <Icon name="volume" size={16} />
+          </button>
         </div>
 
         <div className="options-grid">
@@ -116,10 +134,10 @@ export function McqGame({ title, questions: initialQuestions, onBack, onReplay }
               else btnClass += ' dimmed';
             }
             return (
-              <button key={opt} className={btnClass} onClick={() => choose(opt)} disabled={answered}>
+              <button type="button" key={opt} className={btnClass} onClick={() => choose(opt)} disabled={answered}>
                 <span className="option-text">{opt}</span>
-                {answered && opt === current.correctAnswer && <span className="check-mark">✓</span>}
-                {answered && opt === selected && opt !== current.correctAnswer && <span className="x-mark">✗</span>}
+                {answered && opt === current.correctAnswer && <span className="check-mark"><Icon name="check" size={16} /></span>}
+                {answered && opt === selected && opt !== current.correctAnswer && <span className="x-mark"><Icon name="x" size={16} /></span>}
               </button>
             );
           })}
@@ -134,8 +152,9 @@ export function McqGame({ title, questions: initialQuestions, onBack, onReplay }
       </div>
 
       <div className="quiz-bottom-bar">
-        <button className={`next-btn ${answered ? 'active' : ''}`} onClick={next} disabled={!answered}>
+        <button type="button" className={`next-btn ${answered ? 'active' : ''}`} onClick={next} disabled={!answered}>
           {index < questions.length - 1 ? tx('verbs.next') : tx('verbs.finish')}
+          <Icon name="arrowRight" size={18} />
         </button>
       </div>
     </div>

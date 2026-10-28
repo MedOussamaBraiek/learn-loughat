@@ -5,6 +5,7 @@ import { SceneArt } from './SceneArt';
 import { useTTS } from '../hooks/useTTS';
 import { useGloss } from '../i18n/GlossContext';
 import { GlossToggle } from './GlossToggle';
+import { Icon } from './Icon';
 
 interface SceneBoardProps {
   scene: SceneInfo;
@@ -81,14 +82,14 @@ export function SceneBoard({ scene, learnLang, onBack }: SceneBoardProps) {
       setSolved((prev) => new Set(prev).add(itemId));
       setChipSel(null);
       setSpotSel(null);
-      setMessage({ ok: true, text: `✅ ${itemId} (${itemLabel(itemId)})` });
+      setMessage({ ok: true, text: `${itemId} (${itemLabel(itemId)})` });
       speakItem(itemId);
       return;
     }
     setMistakes((m) => m + 1);
     setWrongId(spotId);
     setTimeout(() => setWrongId(null), 600);
-    setMessage({ ok: false, text: `❌ That spot is ${spotId}, not ${itemId}.` });
+    setMessage({ ok: false, text: `That spot is ${spotId}, not ${itemId}.` });
   };
 
   const onSpotClick = (id: string) => {
@@ -153,7 +154,7 @@ export function SceneBoard({ scene, learnLang, onBack }: SceneBoardProps) {
   const showAnswer = () => {
     if (!spotSel) return;
     setSolved((prev) => new Set(prev).add(spotSel));
-    setMessage({ ok: true, text: `💡 ${spotSel} (${itemLabel(spotSel)})` });
+    setMessage({ ok: true, text: `${spotSel} (${itemLabel(spotSel)})` });
     speakItem(spotSel);
     setSpotSel(null);
     setChipSel(null);
@@ -182,14 +183,16 @@ export function SceneBoard({ scene, learnLang, onBack }: SceneBoardProps) {
 
   let prompt = 'Drag a word onto its place on the picture. Or tap a word, then tap its place.';
   if (chipSel) prompt = `Now tap the place for ${chipSel}.`;
-  if (spotSel) prompt = 'Now tap the word for this place (or 💡 reveal it).';
+  if (spotSel) prompt = 'Now tap the word for this place (or reveal it).';
 
   return (
     <div className="course-screen">
       <div className="course-header">
-        <button className="back-btn" onClick={onBack}>←</button>
+        <button type="button" className="back-btn" onClick={onBack} aria-label="Back">
+          <Icon name="arrowLeft" size={20} />
+        </button>
         <div className="course-header-center">
-          <span className="course-unit-icon big">{scene.icon}</span>
+          <span className="course-unit-icon big"><Icon name="image" size={26} /></span>
           <h2 className="course-title">{scene.title}</h2>
         </div>
       </div>
@@ -197,11 +200,22 @@ export function SceneBoard({ scene, learnLang, onBack }: SceneBoardProps) {
       <GlossToggle />
 
       <div className="scene-modes">
-        <button className={`scene-mode-btn${mode === 'learn' ? ' active' : ''}`} onClick={() => setMode('learn')}>👀 Learn</button>
-        <button className={`scene-mode-btn${mode === 'play' ? ' active' : ''}`} onClick={() => setMode('play')}>🎯 Play</button>
+        <button type="button" className={`scene-mode-btn${mode === 'learn' ? ' active' : ''}`} onClick={() => setMode('learn')}>
+          <Icon name="eye" size={17} />
+          Learn
+        </button>
+        <button type="button" className={`scene-mode-btn${mode === 'play' ? ' active' : ''}`} onClick={() => setMode('play')}>
+          <Icon name="target" size={17} />
+          Play
+        </button>
       </div>
 
-      {scene.hint && <p className="scene-hint">💡 {scene.hint}</p>}
+      {scene.hint && (
+        <p className="scene-hint">
+          <Icon name="lightbulb" size={17} />
+          {scene.hint}
+        </p>
+      )}
 
       {mode === 'learn' && (
         <p className="match-hint">Tap a word or a dot to hear it.</p>
@@ -215,7 +229,10 @@ export function SceneBoard({ scene, learnLang, onBack }: SceneBoardProps) {
       )}
 
       {mode === 'play' && message && (
-        <p className={`scene-message ${message.ok ? 'ok' : 'bad'}`}>{message.text}</p>
+        <p className={`scene-message ${message.ok ? 'ok' : 'bad'}`}>
+          <Icon name={message.ok ? 'check' : 'x'} size={16} />
+          {message.text}
+        </p>
       )}
 
       <div className="scene-board">
@@ -277,7 +294,7 @@ export function SceneBoard({ scene, learnLang, onBack }: SceneBoardProps) {
               onClick={() => onSpotClick(item.id)}
               aria-label={item.id}
             >
-              {done ? '✓' : ''}
+              {done ? <Icon name="check" size={16} /> : ''}
             </button>
           );
         })}
@@ -301,7 +318,10 @@ export function SceneBoard({ scene, learnLang, onBack }: SceneBoardProps) {
           </div>
           {spotSel && (
             <div className="scene-answer">
-              <button className="action-btn secondary" onClick={showAnswer}>💡 Show answer</button>
+              <button type="button" className="action-btn secondary" onClick={showAnswer}>
+                <Icon name="lightbulb" size={17} />
+                Show answer
+              </button>
             </div>
           )}
         </>
@@ -313,11 +333,14 @@ export function SceneBoard({ scene, learnLang, onBack }: SceneBoardProps) {
 
       {mode === 'play' && solvedAll && (
         <div className="match-finished">
-          <h3>🎉 Great job!</h3>
+          <h3>
+            <Icon name="sparkles" size={22} />
+            Great job!
+          </h3>
           <p>Total mistakes: {mistakes}</p>
           <div className="scene-finish-actions">
-            <button className="action-btn primary" onClick={restart}>Play again</button>
-            <button className="action-btn secondary" onClick={onBack}>Back</button>
+            <button type="button" className="action-btn primary" onClick={restart}>Play again</button>
+            <button type="button" className="action-btn secondary" onClick={onBack}>Back</button>
           </div>
         </div>
       )}

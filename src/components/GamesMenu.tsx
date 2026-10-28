@@ -1,5 +1,7 @@
 import type { Level, LearnLanguage, TopicUnit } from '../types';
 import { getTopics } from '../data/topics';
+import { Icon } from './Icon';
+import { Pictogram } from './Pictogram';
 
 interface GamesMenuProps {
   level: Level;
@@ -15,9 +17,12 @@ export function GamesMenu({ level, learnLang, onPlayMatch, onBack }: GamesMenuPr
   return (
     <div className="course-screen">
       <div className="course-header">
-        <button className="back-btn" onClick={onBack}>←</button>
+        <button type="button" className="back-btn" onClick={onBack} aria-label="Back">
+          <Icon name="arrowLeft" size={20} />
+        </button>
         <div className="course-header-center">
-          <h2 className="course-title">🎮 Word games</h2>
+          <span className="course-unit-icon big"><Icon name="gamepad" size={26} /></span>
+          <h2 className="course-title">Word games</h2>
         </div>
       </div>
       <p className="match-hint">Pick a topic to play the matching game.</p>
@@ -27,10 +32,15 @@ export function GamesMenu({ level, learnLang, onPlayMatch, onBack }: GamesMenuPr
       ) : (
         <div className="games-list">
           {topics.map((topic) => (
-            <button key={topic.id} className="games-row" onClick={() => onPlayMatch(topic)}>
-              <span className="course-unit-icon">{topic.icon}</span>
+            <button type="button" key={topic.id} className="games-row" onClick={() => onPlayMatch(topic)}>
+              <span className="course-unit-icon">
+                <Pictogram emoji={topic.icon} size={20} />
+              </span>
               <span className="games-row-title">{topic.title}</span>
-              <span className="games-row-meta">{topic.words.length} words · Match →</span>
+              <span className="games-row-meta">{topic.words.length} words</span>
+              <span className="games-row-go">
+                <Icon name="arrowRight" size={17} />
+              </span>
             </button>
           ))}
         </div>
