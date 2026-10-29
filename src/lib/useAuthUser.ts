@@ -18,12 +18,19 @@ export function useAuthUser(): AuthState {
       setState({ ready: true, user: null, blocked: false });
       return;
     }
-    amIBlocked().then((blocked) => setState({ ready: true, user, blocked }));
+    // Show the user right away; the block check must never hold up the session.
+    setState({ ready: true, user, blocked: false });
+    amIBlocked().then((blocked) => {
+      setState((prev) => (prev.user?.id === user.id ? { ...prev, blocked } : prev));
+    });
   };
 
   useEffect(() => {
     if (!supabase) return;
-    supabase.auth.getSession().then(({ data }) => apply(data.session?.user ?? null));
+    supabase.auth
+      .getSession()
+      .then(({ data }) => apply(data.session?.user ?? null))
+      .catch(() => apply(null));
     const { data } = supabase.auth.onAuthStateChange((_event, session) => apply(session?.user ?? null));
     return () => data.subscription.unsubscribe();
   }, []);

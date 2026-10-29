@@ -2,7 +2,8 @@ import { signInWithGoogle } from '../lib/rankings';
 import { dayKey } from '../lib/daily';
 import { Leaderboard } from './Leaderboard';
 import { supabase } from '../lib/supabase';
-import { useAuthUser } from '../lib/useAuthUser';
+import type { User } from '@supabase/supabase-js';
+import { userProfile } from '../lib/userProfile';
 import { Navbar } from './Navbar';
 import { Icon, type IconName } from './Icon';
 
@@ -16,14 +17,25 @@ const features: { icon: IconName; title: string; desc: string }[] = [
 ];
 
 interface SignInProps {
-  showApp?: boolean;
+  user?: User | null;
   onEnterApp?: () => void;
   isAdmin?: boolean;
   onAdmin?: () => void;
 }
 
-export function SignIn({ onEnterApp, isAdmin, onAdmin }: SignInProps) {
-  const auth = useAuthUser();
+// Supabase reports a failed OAuth return in the URL instead of throwing.
+function redirectError(): string | null {
+  const search = new URLSearchParams(window.location.search);
+  const hash = new URLSearchParams(window.location.hash.replace(/^#/, ''));
+  const message = search.get('error_description') ?? hash.get('error_description');
+  if (message) return message;
+  const code = search.get('error') ?? hash.get('error');
+  return code ? 'Google sign-in did not finish. Please try again.' : null;
+}
+
+export function SignIn({ user, onEnterApp, isAdmin, onAdmin }: SignInProps) {
+  const profile = userProfile(user);
+  const authError = redirectError();
   const start = () => {
     if (supabase) {
       void signInWithGoogle();
@@ -38,7 +50,14 @@ export function SignIn({ onEnterApp, isAdmin, onAdmin }: SignInProps) {
 
   return (
     <div className="lp">
-      <Navbar onHome={() => window.scrollTo({ top: 0, behavior: 'smooth' })} signedIn={!!auth.user} isAdmin={isAdmin} onAdmin={onAdmin} />
+      <Navbar
+        onHome={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+        signedIn={!!user}
+        userName={profile.name}
+        avatarUrl={profile.avatarUrl}
+        isAdmin={isAdmin}
+        onAdmin={onAdmin}
+      />
 
       <section className="lp-hero">
         <div className="lp-hero-container">
@@ -54,7 +73,7 @@ export function SignIn({ onEnterApp, isAdmin, onAdmin }: SignInProps) {
               Master German from A1 to B2 with interactive lessons, picture games, quizzes, and daily challenges. Learn at your own pace with a premium educational experience.
             </p>
             <div className="lp-hero-actions">
-              {auth.user ? (
+              {user ? (
                 <button type="button" className="lp-btn lp-btn-primary lp-btn-shadow" onClick={enter}>
                   Start learning
                   <Icon name="arrowRight" size={18} />
@@ -73,6 +92,11 @@ export function SignIn({ onEnterApp, isAdmin, onAdmin }: SignInProps) {
               )}
             </div>
             <p className="lp-hero-note">No credit card required • Start learning in seconds</p>
+            {authError && (
+              <p className="lp-hero-error" role="alert">
+                {authError}
+              </p>
+            )}
           </div>
           <div className="lp-hero-visual">
             <div className="lp-hero-card">
@@ -167,7 +191,7 @@ export function SignIn({ onEnterApp, isAdmin, onAdmin }: SignInProps) {
           <div className="lp-cta-card">
             <h2 className="lp-cta-title">Ready to start your German journey?</h2>
             <p className="lp-cta-subtitle">Join thousands of learners mastering German with Learn Loughat</p>
-            {auth.user ? (
+            {user ? (
               <button type="button" className="lp-btn lp-btn-primary lp-btn-shadow large" onClick={enter}>
                 Start learning
                 <Icon name="arrowRight" size={18} />

@@ -7,12 +7,14 @@ import { LanguageSwitcher } from './LanguageSwitcher';
 interface NavbarProps {
   onHome: () => void;
   signedIn: boolean;
+  userName?: string | null;
+  avatarUrl?: string | null;
   isAdmin?: boolean;
   onAdmin?: () => void;
 }
 
 // The same navbar on the landing page and on every app screen.
-export function Navbar({ onHome, signedIn, isAdmin, onAdmin }: NavbarProps) {
+export function Navbar({ onHome, signedIn, userName, avatarUrl, isAdmin, onAdmin }: NavbarProps) {
   const tx = useTx();
 
   return (
@@ -35,10 +37,22 @@ export function Navbar({ onHome, signedIn, isAdmin, onAdmin }: NavbarProps) {
           )}
           {supabase && (
             signedIn ? (
-              <button type="button" className="app-nav-btn" onClick={() => { void signOut(); }}>
-                <Icon name="logout" size={17} />
-                <span className="app-nav-label">{tx('home.signOut')}</span>
-              </button>
+              <>
+                <div className="app-nav-user" title={userName ?? undefined}>
+                  {avatarUrl ? (
+                    <img className="app-nav-avatar" src={avatarUrl} alt={userName ?? 'Profile'} referrerPolicy="no-referrer" />
+                  ) : (
+                    <span className="app-nav-avatar app-nav-avatar-fallback">
+                      <Icon name="user" size={16} />
+                    </span>
+                  )}
+                  {userName && <span className="app-nav-user-name">{userName}</span>}
+                </div>
+                <button type="button" className="app-nav-btn" onClick={() => { void signOut(); }}>
+                  <Icon name="logout" size={17} />
+                  <span className="app-nav-label">{tx('home.signOut')}</span>
+                </button>
+              </>
             ) : (
               <button type="button" className="app-nav-btn primary" onClick={() => { void signInWithGoogle(); }}>
                 <Icon name="login" size={17} />

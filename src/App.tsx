@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import type { Level, Question, Answer, LearnLanguage, Flashcard, TopicUnit } from './types';
+import type { User } from '@supabase/supabase-js';
 import { LanguageProvider, useLang } from './i18n/LanguageContext';
 import { GlossProvider } from './i18n/GlossContext';
 import { DailyChallenge } from './components/DailyChallenge';
@@ -9,6 +10,7 @@ import { RankingsPage } from './components/RankingsPage';
 import { AdminUsers } from './components/AdminUsers';
 import { isAdminEmail } from './lib/admin';
 import { useAuthUser } from './lib/useAuthUser';
+import { userProfile } from './lib/userProfile';
 import { supabase } from './lib/supabase';
 import { LANDING_PATH, PLATFORM_PATH, navigate, usePathname } from './lib/router';
 import { LevelSelect } from './components/LevelSelect';
@@ -36,8 +38,11 @@ type Screen = 'levels' | 'courses' | 'memory' | 'helper' | 'hub' | 'daily' | 'ra
 
 const rtlLangs = new Set(['ar']);
 
-function AppContent({ isAdmin, initialScreen = 'levels', onHome }: { isAdmin: boolean; initialScreen?: Screen; onHome: () => void }) {
+function AppContent({ isAdmin, user, initialScreen = 'levels', onHome }: {
+  isAdmin: boolean; user: User | null; initialScreen?: Screen; onHome: () => void;
+}) {
   const { lang } = useLang();
+  const profile = userProfile(user);
   const [screen, setScreen] = useState<Screen>(initialScreen);
   const [prevScreen, setPrevScreen] = useState<Screen>('levels');
   const [level, setLevel] = useState<Level>('A1');
@@ -162,7 +167,9 @@ function AppContent({ isAdmin, initialScreen = 'levels', onHome }: { isAdmin: bo
     <div className="app-root">
       <Navbar
         onHome={onHome}
-        signedIn={!!supabase}
+        signedIn={!!user}
+        userName={profile.name}
+        avatarUrl={profile.avatarUrl}
         isAdmin={isAdmin}
         onAdmin={() => goTo('admin')}
       />
@@ -341,9 +348,16 @@ function AppGate() {
   }
 
   if (onPlatform && auth.user && auth.blocked) {
+    const profile = userProfile(auth.user);
     return (
       <div className="app-root">
-        <Navbar onHome={() => navigate(LANDING_PATH)} signedIn isAdmin={isAdmin} />
+        <Navbar
+          onHome={() => navigate(LANDING_PATH)}
+          signedIn
+          userName={profile.name}
+          avatarUrl={profile.avatarUrl}
+          isAdmin={isAdmin}
+        />
         <div className="app-container">
           <Blocked />
         </div>
@@ -355,6 +369,7 @@ function AppGate() {
     return (
       <AppContent
         isAdmin={isAdmin}
+        user={auth.user}
         initialScreen={entryScreen}
         onHome={() => navigate(LANDING_PATH)}
       />
@@ -363,7 +378,7 @@ function AppGate() {
 
   return (
     <SignIn
-      showApp={!!auth.user}
+      user={auth.user}
       onEnterApp={() => enterApp()}
       isAdmin={isAdmin}
       onAdmin={() => enterApp('admin')}

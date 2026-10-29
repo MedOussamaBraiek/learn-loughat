@@ -173,6 +173,19 @@
   margin: 0;
 }
 
+.lp-hero-error {
+  margin: 0;
+  max-width: 480px;
+  padding: 10px 14px;
+  border-radius: 12px;
+  border: 1px solid #fecaca;
+  background: #fef2f2;
+  color: #b91c1c;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.45;
+}
+
 .lp-hero-visual {
   display: flex;
   justify-content: center;
