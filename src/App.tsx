@@ -12,6 +12,7 @@ import { isAdminEmail } from './lib/admin';
 import { useAuthUser } from './lib/useAuthUser';
 import { userProfile } from './lib/userProfile';
 import { supabase } from './lib/supabase';
+import { hasAuthCallback } from './lib/authCallback';
 import { LANDING_PATH, PLATFORM_PATH, navigate, usePathname } from './lib/router';
 import { LevelSelect } from './components/LevelSelect';
 import { Navbar } from './components/Navbar';
@@ -315,6 +316,11 @@ function AppGate() {
   const isAdmin = isAdminEmail(auth.user?.email);
   const onPlatform = path === PLATFORM_PATH || path.startsWith(`${PLATFORM_PATH}/`);
   const signedInBefore = useRef(false);
+  // Offline development without .env.local can still browse the app; a deployed
+  // build without Supabase must never silently let people in without a session.
+  const offlineDev = !supabase && import.meta.env.DEV;
+  const canUseApp = !!auth.user || offlineDev;
+  const missingConfig = !supabase && !import.meta.env.DEV;
 
   useEffect(() => {
     if (path !== LANDING_PATH && !onPlatform) {
@@ -335,8 +341,8 @@ function AppGate() {
     }
 
     signedInBefore.current = false;
-    if (onPlatform && supabase) navigate(LANDING_PATH, { replace: true });
-  }, [auth.ready, auth.user, onPlatform]);
+    if (onPlatform && !offlineDev) navigate(LANDING_PATH, { replace: true });
+  }, [auth.ready, auth.user, onPlatform, offlineDev]);
 
   const enterApp = (screen: Screen = 'levels') => {
     setEntryScreen(screen);
@@ -344,6 +350,14 @@ function AppGate() {
   };
 
   if (!auth.ready) {
+    if (hasAuthCallback()) {
+      return (
+        <div className="auth-loading" role="status">
+          <span className="auth-loading-spinner" aria-hidden="true" />
+          Signing you in…
+        </div>
+      );
+    }
     return <SignIn isAdmin={isAdmin} />;
   }
 
@@ -365,7 +379,7 @@ function AppGate() {
     );
   }
 
-  if (onPlatform && (auth.user || !supabase)) {
+  if (onPlatform && canUseApp) {
     return (
       <AppContent
         isAdmin={isAdmin}
@@ -379,6 +393,8 @@ function AppGate() {
   return (
     <SignIn
       user={auth.user}
+      authError={auth.error}
+      configMissing={missingConfig}
       onEnterApp={() => enterApp()}
       isAdmin={isAdmin}
       onAdmin={() => enterApp('admin')}

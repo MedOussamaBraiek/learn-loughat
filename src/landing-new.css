@@ -131,6 +131,13 @@
   gap: 8px;
 }
 
+.lp-btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
 .lp-btn-primary {
   background: linear-gradient(135deg, var(--blue) 0%, #2563eb 100%);
   color: white;

@@ -3,6 +3,7 @@ import { dayKey } from '../lib/daily';
 import { Leaderboard } from './Leaderboard';
 import { supabase } from '../lib/supabase';
 import type { User } from '@supabase/supabase-js';
+import { authCallbackErrorMessage } from '../lib/authCallback';
 import { userProfile } from '../lib/userProfile';
 import { Navbar } from './Navbar';
 import { Icon, type IconName } from './Icon';
@@ -18,29 +19,23 @@ const features: { icon: IconName; title: string; desc: string }[] = [
 
 interface SignInProps {
   user?: User | null;
+  authError?: string | null;
+  configMissing?: boolean;
   onEnterApp?: () => void;
   isAdmin?: boolean;
   onAdmin?: () => void;
 }
 
-// Supabase reports a failed OAuth return in the URL instead of throwing.
-function redirectError(): string | null {
-  const search = new URLSearchParams(window.location.search);
-  const hash = new URLSearchParams(window.location.hash.replace(/^#/, ''));
-  const message = search.get('error_description') ?? hash.get('error_description');
-  if (message) return message;
-  const code = search.get('error') ?? hash.get('error');
-  return code ? 'Google sign-in did not finish. Please try again.' : null;
-}
-
-export function SignIn({ user, onEnterApp, isAdmin, onAdmin }: SignInProps) {
+export function SignIn({ user, authError, configMissing = false, onEnterApp, isAdmin, onAdmin }: SignInProps) {
   const profile = userProfile(user);
-  const authError = redirectError();
+  const error = configMissing
+    ? 'Sign-in isn’t configured for this deployment. Add VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY in your hosting settings, then redeploy.'
+    : authError ?? authCallbackErrorMessage();
   const start = () => {
     if (supabase) {
       void signInWithGoogle();
-    } else if (onEnterApp) {
-      onEnterApp();
+    } else if (!configMissing) {
+      onEnterApp?.();
     }
   };
 
@@ -80,11 +75,11 @@ export function SignIn({ user, onEnterApp, isAdmin, onAdmin }: SignInProps) {
                 </button>
               ) : (
                 <>
-                  <button type="button" className="lp-btn lp-btn-primary lp-btn-shadow" onClick={start}>
+                  <button type="button" className="lp-btn lp-btn-primary lp-btn-shadow" onClick={start} disabled={configMissing}>
                     Get Started Free
                     <Icon name="arrowRight" size={18} />
                   </button>
-                  <button type="button" className="lp-btn lp-btn-secondary" onClick={start}>
+                  <button type="button" className="lp-btn lp-btn-secondary" onClick={start} disabled={configMissing}>
                     <Icon name="login" size={18} />
                     Connect with Google
                   </button>
@@ -92,9 +87,9 @@ export function SignIn({ user, onEnterApp, isAdmin, onAdmin }: SignInProps) {
               )}
             </div>
             <p className="lp-hero-note">No credit card required • Start learning in seconds</p>
-            {authError && (
+            {error && (
               <p className="lp-hero-error" role="alert">
-                {authError}
+                {error}
               </p>
             )}
           </div>
@@ -197,7 +192,7 @@ export function SignIn({ user, onEnterApp, isAdmin, onAdmin }: SignInProps) {
                 <Icon name="arrowRight" size={18} />
               </button>
             ) : (
-              <button type="button" className="lp-btn lp-btn-primary lp-btn-shadow large" onClick={start}>
+              <button type="button" className="lp-btn lp-btn-primary lp-btn-shadow large" onClick={start} disabled={configMissing}>
                 Start Learning for Free
                 <Icon name="arrowRight" size={18} />
               </button>
