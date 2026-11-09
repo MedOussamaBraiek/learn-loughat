@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { signInWithGoogle } from '../lib/rankings';
 import { dayKey } from '../lib/daily';
 import { Leaderboard } from './Leaderboard';
@@ -28,14 +29,24 @@ interface SignInProps {
 
 export function SignIn({ user, authError, configMissing = false, onEnterApp, isAdmin, onAdmin }: SignInProps) {
   const profile = userProfile(user);
-  const error = configMissing
-    ? 'Sign-in isn’t configured for this deployment. Add VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY in your hosting settings, then redeploy.'
-    : authError ?? authCallbackErrorMessage();
-  const start = () => {
+  const [localError, setLocalError] = useState<string | null>(null);
+  const error = localError
+    ?? (configMissing
+      ? 'Sign-in isn’t configured for this deployment. Add VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY in your hosting settings, then redeploy.'
+      : authError ?? authCallbackErrorMessage());
+  const start = async () => {
+    setLocalError(null);
     if (supabase) {
-      void signInWithGoogle();
+      try {
+        await signInWithGoogle();
+      } catch (e) {
+        setLocalError(e instanceof Error ? e.message : 'Could not start Google sign-in. Please try again.');
+      }
     } else if (!configMissing) {
+      // Offline dev mode (no Supabase configured locally): allow entering the platform.
       onEnterApp?.();
+    } else {
+      setLocalError('Google sign-in is not configured for this deployment.');
     }
   };
 

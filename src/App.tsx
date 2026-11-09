@@ -332,10 +332,9 @@ function AppGate() {
     if (!auth.ready) return;
 
     if (auth.user) {
-      // A fresh sign-in (including the OAuth return) enters the platform once.
+      // After sign-in, stay on the landing page (/) and let the user enter /platform explicitly.
       if (!signedInBefore.current) {
         signedInBefore.current = true;
-        if (!onPlatform) navigate(PLATFORM_PATH, { replace: true });
       }
       return;
     }

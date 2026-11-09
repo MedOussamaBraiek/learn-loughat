@@ -1,7 +1,8 @@
 /* New Landing Page - Matching design style with blue theme */
 .lp {
   min-height: 100vh;
-  background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
+  background: #ffffff;
+  background-color: #ffffff;
 }
 
 .lp-nav {

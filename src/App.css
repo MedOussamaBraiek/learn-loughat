@@ -1,7 +1,8 @@
 /* ============ APP CONTAINER ============ */
 .app-container {
   min-height: 100vh;
-  background: linear-gradient(135deg, #f8fbff 0%, #eef6ff 50%, #e8f4ff 100%);
+  background: #ffffff;
+  background-color: #ffffff;
 }
 
 /* ============ LANGUAGE SWITCHER ============ */

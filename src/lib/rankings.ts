@@ -25,11 +25,12 @@ export async function currentUser() {
 }
 
 export async function signInWithGoogle() {
-  if (!supabase) return;
-  await supabase.auth.signInWithOAuth({
+  if (!supabase) throw new Error('Google sign-in is not configured. Add VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY to .env.local and restart the dev server.');
+  const { error } = await supabase.auth.signInWithOAuth({
     provider: 'google',
     options: { redirectTo: window.location.origin },
   });
+  if (error) throw error;
 }
 
 export async function signOut() {
